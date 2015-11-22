@@ -5,9 +5,9 @@ Modern Editor is a text editor API. It is event-based, meaning that there are ma
 
 ## Characteristics
 
-- Event-based: most things are an event. For example, when the selection of the text of the editor changes the event `editor.on('select', function(){});` is triggered. When a registered shortcut is pressed the event `editor.on('shortcut', function(){})` is triggered. There are many more, see below for the description of few
-- Extensible: there are several ways of doing the same thing, which adds flexibility. However, there's a *preferred* way for most things. All of this is documented below.
-- Defaults: some common actions are 
+- **Event-based**: most things are an event. For example, when the selection of the text of the editor changes the event `editor.on('select', function(){});` is triggered
+- **Extensible**: there are several ways of doing the same thing but one is recommended for consistence. The core is an event api on top of which the editor is built.
+- **Defaults**: some common actions are already set and waiting for you to activate them, such as `bold`, `italics`, `link`, etc.
 
 
 ## Getting started
