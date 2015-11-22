@@ -1,5 +1,7 @@
 ![Modern Editor](https://raw.githubusercontent.com/franciscop/modern-editor/master/screenshot.png)
 
+> Click the image above for a larger version on mobile
+
 - **Event-based**: most things are an event. For example, when the selection of the text of the editor changes the event `editor.on('select', function(){});` is triggered
 - **Extensible**: there are several ways of doing the same thing but one is recommended for consistence. The core is an event api on top of which the editor is built.
 - **Defaults**: some common actions are already set and waiting for you to activate them, such as `bold`, `italics`, `link`, etc.
