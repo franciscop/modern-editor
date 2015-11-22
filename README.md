@@ -1,12 +1,13 @@
 # Modern Editor
 
-Modern Editor is a text editor API. It is event-based, meaning that there are many events pre-loaded and you can easily define more. There are no default actions, but in the examples below you can see how easy it is to add new examples. If you want some pre-made ones, you can check the folder `/actions` to see some examples.
+Modern Editor is a text editor API. It is event-based, meaning that there are many events and actions pre-loaded and you can easily define more.
 
 
 ## Characteristics
 
 - Event-based: most things are an event. For example, when the selection of the text of the editor changes the event `editor.on('select', function(){});` is triggered. When a registered shortcut is pressed the event `editor.on('shortcut', function(){})` is triggered. There are many more, see below for the description of few
 - Extensible: there are several ways of doing the same thing, which adds flexibility. However, there's a *preferred* way for most things. All of this is documented below.
+- Defaults: some common actions are 
 
 
 ## Getting started
@@ -29,9 +30,7 @@ An action is something that can happen by several means. They are defined like t
 editor.action.add(name, {
   menu: {} || "" || false,          // The html or icon to show
   shortcut: {} || "" || false,      // The key for Ctrl+key or { key: "esc" }
-  init: function(){} || false,      // Called when activating an editor
-  action: function(){} || false,    // Click or shortcut for that action
-  destroy: function(){} || false    // Deactivating an editor
+  action: function(){} || false     // Click or shortcut for that action
 });
 ```
 
@@ -41,10 +40,19 @@ editor.action.add(name, {
 
 `shortcut`: set a shortcut that triggers the action. Example: `options: { menu: "esc" }` or `options: { menu: "ctrl+b" }`
 
+`action`: the action that will be called when the `menu` item is clicked, when the `shortcut` is activated or when the action is triggered by other means (`editor.trigger('action:<name>')`). If it's not set, then when it's called it will do nothing
+
+
+### Default actions
+
+These actions are added by default but not activated until you set them up. Setting them up is really easy:
 
 ```js
-editor.add('default:bold');
-editor.add('default:italics');
+// Add a button to the popup menu
+editor.add('default:italics', { menu: '<em>i</em>' });
+
+// Add a shortcut to the editor
+editor.add('default:bold', { shortcut: 'ctrl+b' });
 ```
 
 
