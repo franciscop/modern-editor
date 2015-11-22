@@ -1,0 +1,81 @@
+article {
+  font-family: 'Lora', serif;
+  width: 90%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 3em 0;
+}
+
+article h1 {
+  padding: 0;
+}
+
+article p {
+  margin-top: 0;
+  padding: .5em 0;
+}
+
+ul {
+  padding-left: 20px;
+}
+
+.menu {
+  position: absolute;
+  margin: 5px 0;
+  list-style: none;
+  display: none;
+  z-index: 1000;
+  overflow: hidden;
+  border: 1px solid #CCC;
+  white-space: nowrap;
+  font-family: serif;
+  background: #FFF;
+  color: #333;
+  padding: 0;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.menu.visible {
+  opacity: 1;
+  transition: opacity .2s ease;
+}
+
+.menu li {
+  padding: 8px 12px;
+  min-width: 1em;
+  text-align: center;
+  float: left;
+  cursor: pointer;
+  margin: 0;
+  box-sizing: content-box;
+}
+.menu li:hover {
+  background-color: #DEF;
+}
+
+.menu .bold {
+  font-weight: bold;
+}
+.menu .italic {
+  font-style: italic;
+}
+.link {
+  font-family: bold;
+}
+/*
+.menu.action li {
+  display: none;
+}
+.action .action.active {
+  display: block;
+}
+.action input {
+  font-size: 1em;
+  padding: 8px 12px;
+  border: none;
+  height: auto;
+  width: auto;
+}*/
