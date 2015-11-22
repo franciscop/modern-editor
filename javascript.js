@@ -1,10 +1,8 @@
 // Initialize the editor in the element that is contenteditable
 var editor = new Editor("article");
 
-
-
 // Register a new action called "bold"
-editor.action.add("bold", {
+editor.add("bold", {
   menu: "<strong>B</strong>", shortcut: "b",
   action: function() {
     this.command("bold");
@@ -12,7 +10,7 @@ editor.action.add("bold", {
 });
 
 // Register a new action called "italic"
-editor.action.add("italic", {
+editor.add("italic", {
   menu: "<em>i</em>", shortcut: "i",
   action: function() {
     this.command("italic");
@@ -20,7 +18,7 @@ editor.action.add("italic", {
 });
 
 // Register a new action called "link" with 
-editor.action.add("link", {
+editor.add("link", {
   menu: "⚓", shortcut: "k",
   action: function() {
     var link = this.selection.element.getAttribute("href") || "";
@@ -32,12 +30,13 @@ editor.action.add("link", {
 });
 
 // Register a new action called "italic"
-editor.action.add("code", {
+editor.add("code", {
   menu: ">", shortcut: "`",
   action: function() {
     this.command("insertHtml", "<code>" + this.selection.text + "</code>");
   }
 });
+
 
 
 //editor.active(true);

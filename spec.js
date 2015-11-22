@@ -7,9 +7,9 @@ var editor = new Editor("");
 editor.active(true || false);
 
 // Set a new action
-editor.action.add("", {
-  shortcut: "" || {} || false,      // The key for Ctrl+key or { key: "esc" }
-  menu: "" || {} || false,          // The html or icon to show
+editor.add("", {
+  shortcut: {} || "" || false,      // The key for Ctrl+key or { key: "esc" }
+  menu: {} || "" || false,          // The html or icon to show
   init: function(){} || false,      // Called when activating an editor
   action: function(){} || false,    // Click or shortcut for that action
   destroy: function(){} || false    // Deactivating an editor
@@ -24,16 +24,8 @@ editor.on("action", function(){});
 // Registered action
 editor.on("action:save", function(){});
 
-// Special events
-editor.on("action:before", function(){});
-editor.on("action:pre", function(){});
-editor.on("action:post", function(){});
-editor.on("action:after", function(){});
-editor.on("action:none", function(){});
-
 // The editor is destroyed or de-activated
 editor.on("destroy", function(){});
-
 
 // The editor re-reads its data
 editor.on("refresh", function(){});
@@ -45,6 +37,14 @@ editor.on("click", function(){});
 editor.on("key", function(){});
 
 editor.on("select", function(){});
+
+
+// Special events
+editor.on("<event>:before", function(){});
+editor.on("<event>:pre", function(){});
+editor.on("<event>:post", function(){});
+editor.on("<event>:after", function(){});
+editor.on("<event>:none", function(){});
 
 
 
