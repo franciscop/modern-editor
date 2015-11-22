@@ -29,8 +29,6 @@ editor.add("link", {
   }
 });
 
-editor.trigger('menu:separator');
-
 // Register a new action called "italic"
 editor.add("code", {
   menu: ">", shortcut: "ctrl+`",
