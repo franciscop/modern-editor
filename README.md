@@ -1,5 +1,7 @@
 # Modern Editor
 
+![Example of a screenshot](https://raw.githubusercontent.com/franciscop/modern-editor/master/screenshot.png)
+
 Modern Editor is a text editor API. It is event-based, meaning that there are many events and actions pre-loaded and you can easily define more. Features:
 
 - **Event-based**: most things are an event. For example, when the selection of the text of the editor changes the event `editor.on('select', function(){});` is triggered
