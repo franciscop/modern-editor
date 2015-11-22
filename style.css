@@ -21,7 +21,7 @@ ul {
 
 .menu {
   position: absolute;
-  margin: 5px 0;
+  margin: 0;
   list-style: none;
   display: none;
   z-index: 1000;
@@ -36,16 +36,28 @@ ul {
   box-shadow: 0 0 10px rgba(0, 0, 0, .2);
 }
 
-.menu li {
-  padding: 8px 12px;
-  min-width: 1em;
+.menu > * {
   text-align: center;
+  display: block;
   float: left;
   cursor: pointer;
   margin: 0;
   box-sizing: content-box;
+  height: 1em;
+  line-height: 1em;
+  padding: .5em .6em;
 }
-.menu li:hover {
+
+.menu .action {
+  min-width: 1em;
+}
+
+.menu .separator {
+  border-right: 1px solid #ccc;
+  padding: .5em 0;
+}
+
+.menu .action:hover {
   background-color: #DEF;
 }
 

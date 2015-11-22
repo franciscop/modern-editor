@@ -3,7 +3,7 @@ var editor = new Editor("article");
 
 // Register a new action called "bold"
 editor.add("bold", {
-  menu: "<strong>B</strong>", shortcut: "b",
+  menu: "<strong>B</strong>", shortcut: "ctrl+b",
   action: function() {
     this.command("bold");
   }
@@ -11,7 +11,7 @@ editor.add("bold", {
 
 // Register a new action called "italic"
 editor.add("italic", {
-  menu: "<em>i</em>", shortcut: "i",
+  menu: "<em>i</em>", shortcut: "ctrl+i",
   action: function() {
     this.command("italic");
   }
@@ -19,7 +19,7 @@ editor.add("italic", {
 
 // Register a new action called "link" with 
 editor.add("link", {
-  menu: "⚓", shortcut: "k",
+  menu: "⚓", shortcut: "ctrl+k",
   action: function() {
     var link = this.selection.element.getAttribute("href") || "";
     var address = prompt("Link address", link);
@@ -29,16 +29,21 @@ editor.add("link", {
   }
 });
 
+editor.trigger('menu:separator');
+
 // Register a new action called "italic"
 editor.add("code", {
-  menu: ">", shortcut: "`",
+  menu: ">", shortcut: "ctrl+`",
   action: function() {
     this.command("insertHtml", "<code>" + this.selection.text + "</code>");
   }
 });
 
+// Register a new action called "italic"
+editor.on('action:cancel', function(){
+  this.trigger('menu:hide');
+});
+editor.trigger('shortcut:add', { shortcut: 'esc', action: 'cancel' });
 
-
-//editor.active(true);
 
   

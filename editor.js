@@ -1,8 +1,9 @@
-// Editor
+// Modern Editor
+// An event-based editor for the modern web
 var Editor = function(selector, options){
   
   
-  // Based on https://github.com/tmpvar/defaults/blob/master/index.js
+  // Based on defaults ( https://github.com/tmpvar/defaults )
   function defaults(options, def, wrap) {
     options = typeof options === 'object' ? options : {};
     
@@ -15,6 +16,9 @@ var Editor = function(selector, options){
     return options;
   }
   
+  
+  
+  // INIT
   // Store a local instance
   var editor = this;
   
@@ -22,6 +26,7 @@ var Editor = function(selector, options){
   this.element = this.s(selector);
   if (!this.element) return false;
   
+  // Options
   this.options = defaults(options, {
     
     // Class that will be added to the menu
@@ -48,7 +53,6 @@ var Editor = function(selector, options){
     if (editor.events[name]) {
       editor.trigger(name + ':before', event);
       
-      //console.log(name);
       editor.events[name].forEach(function(callback){
         editor.trigger(name + ':pre', event);
         callback.call(editor, event);
@@ -60,7 +64,6 @@ var Editor = function(selector, options){
     else if (editor.events[name + ':none']) {
       editor.trigger(name + ':none', event);
     }
-    
   };
   
   
@@ -77,8 +80,8 @@ var Editor = function(selector, options){
     var fn = function(){};
     options = defaults(options, { init: fn, action: fn, destroy: fn });
     
-    // Add the action to the action event list like action:save
-    editor.on('init', options.init.bind(editor));
+    // Call the init action inmediately
+    options.init.call(editor);
     
     // Add the action to the action event list like action:save
     editor.on('action:' + name, options.action.bind(editor));
@@ -88,21 +91,7 @@ var Editor = function(selector, options){
     
     
     // Add the shortcut only if there is one
-    var short = options.shortcut;
-    if (short) {
-      short = defaults(short, {
-        key: short.toLowerCase(),
-        code: short.toUpperCase().charCodeAt(),
-        action: name,
-        ctrl: true
-      });
-      
-      short.toString = function(){
-        return '[' + (short.ctrl ? 'ctrl+' : '') + short.key + ']';
-      };
-      
-      editor.trigger('shortcut:add', short);
-    }
+    editor.trigger('shortcut:add', { shortcut: options.shortcut, action: name });
     
     // Add the menu item only if there's one
     if (options.menu) {
@@ -110,8 +99,8 @@ var Editor = function(selector, options){
       // Default options for the menu
       options.menu = defaults(options.menu, {
         html: options.menu,
-        action: name,
-        title: (short ? short + ' ' : '') + name
+        title: (options.shortcut ? '[' + options.shortcut + '] ' : '') + name,
+        action: name
       });
       
       editor.trigger('menu:add', options.menu);
@@ -142,14 +131,25 @@ var Editor = function(selector, options){
     
     var li = document.createElement('li');
     
+    li.classList.add('action');
+    li.setAttribute('data-action', element.action);
     li.setAttribute('title', element.title);
     li.addEventListener("click", function(e) {
       e.preventDefault();
+      editor.trigger('action');
       editor.trigger('action:' + element.action);
     });
     li.innerHTML = element.html;
     this.menu.element.appendChild(li);
   });
+  
+  
+  this.on("menu:separator", function(){
+    var li = document.createElement('li');
+    li.classList.add('separator');
+    this.menu.element.appendChild(li);
+  });
+  
   
   // Show the menu
   this.on('menu:show', function(){
@@ -168,9 +168,10 @@ var Editor = function(selector, options){
     var selection = this.selection.position;
     var doc = editor.s("html").getBoundingClientRect();
     var menu = editor.menu.element.getBoundingClientRect();
+    var margin = 10;
     
     // Delete the '60' to show it on the bottom
-    var top = selection.top - 12 - menu.height - doc.top;
+    var top = selection.top - menu.height - margin - doc.top;
     if (top < 0 ) top = 0;
     var left = selection.left + selection.width / 2 - menu.width / 2;
     if (left < 0) left = 0;
@@ -256,18 +257,18 @@ var Editor = function(selector, options){
     // The selection from the current window
     var selection = window.getSelection();
     
-    this.selection.range = selection.getRangeAt(0);
-    
-    // Store the *right* element
-    var node = selection.anchorNode;
-    if (!node) return false;
-    this.selection.element = node.nodeType == 1 ? node : node.parentElement;
-    
     // Selected text
     this.selection.text = selection.toString();
     
-    // If there's no selection hide the menu and leave
-    return (this.selection.text && this.element.contains(this.selection.element));
+    
+    // Store the *right* element
+    var node = selection.anchorNode;
+    if (!this.selection.text || !node) {
+      return false;
+    }
+    
+    this.selection.element = node.nodeType == 1 ? node : node.parentElement;
+    this.selection.range = selection.getRangeAt(0);
   });
   
   
@@ -277,30 +278,41 @@ var Editor = function(selector, options){
   this.shortcuts = [];
   
   this.on('shortcut:add', function(short){
+    
+    if (!short.shortcut) return false;
+    
+    short.keys = short.shortcut.split('+');
+    
+    //new Shortcut(short);
     this.shortcuts.push(short);
   });
   
   this.on("key", function(e){
     
+    // Store the pressed key
+    e[e.key.toLowerCase()] = true;
+    
     // Normalize Mac's weird key
     e.ctrl = e.ctrlKey || e.metaKey;
+    e.shift = e.shiftKey;
+    e.alt = e.altKey;
+    e.esc = e.keyCode == 27;
     
     function keyCode(short){
-      var charMatch = e.key.length == 1 ? e.key.charCodeAt(0) == short.code : false;
-      return e.keyCode == short.code || charMatch;
+      return !short.keys.filter(function(key){ return !e[key]; }).length;
     }
-    function ctrlKey(short){ return (short.ctrl) ? e.ctrl : true; }
-    function escKey(short){ return (short.esc) ? e.esc : false; }
     
-    var shortcut = editor.shortcuts.filter(keyCode).filter(ctrlKey);
+    var shortcut = editor.shortcuts.filter(keyCode);
     shortcut.forEach(function(short){
-      e.preventDefault();
+      if (!shortcut.default) {
+        e.preventDefault();
+      }
       editor.trigger('shortcut', short);
     });
   });
   
-  this.on("shortcut", function(name){
-    editor.trigger('action:' + name.action);
+  this.on("shortcut", function(short){
+    editor.trigger('action:' + short.action);
   });
   
   this.on("key", function(e){
@@ -312,6 +324,7 @@ var Editor = function(selector, options){
   
   
   window.setInterval(editor.trigger.bind(this, 'refresh'), this.options.delay);
+  this.element.addEventListener("blur", function(e){ editor.trigger('refresh', e); });
   document.addEventListener("keydown", function(e){ editor.trigger('key', e); });
   document.addEventListener("mousedown", function(e){ editor.trigger('click', e); });
   document.addEventListener("touchstart", function(e){ editor.trigger('click', e); });
