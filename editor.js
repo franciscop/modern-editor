@@ -172,7 +172,7 @@ var Editor = function(selector, options){
     var menu = editor.menu.element.getBoundingClientRect();
     
     // Delete the '60' to show it on the bottom
-    var top = selection.top - menu.height - doc.top;
+    var top = selection.top - doc.top;
     if (top < 0 ) top = 0;
     var left = selection.left + selection.width / 2 - menu.width / 2;
     if (left < 0) left = 0;

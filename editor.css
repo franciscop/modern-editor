@@ -14,7 +14,8 @@
   padding: 0;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, .2);
-  margin-top: -2.5em;
+  margin-top: -.5em;
+  transform: translateY(-2em);
 }
 
 .visible {
@@ -26,11 +27,11 @@
 
 @keyframes fadeIn {
   0% {
-    transform: translateY(-1.25em) rotateX(-90deg);
+    transform: translateY(-3.25em) rotateX(-90deg);
     opacity: .2;
   }
   100% {
-    transform: translateY(0) rotateX(0deg);
+    transform: translateY(-2em) rotateX(0deg);
     opacity: 1;
   }
 }
