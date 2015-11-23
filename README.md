@@ -169,21 +169,34 @@ editor.trigger('action:default:bold');
 
 ## Events
 
-These are the events that the API defines. You can easily create more with `editor.on("", function(){})` as we can see at the end.
+These are the events that the API defines. You can easily create more with `editor.on("", function(){})` as we can see at the end. All of them can be set to listen with `on()` or can be called with `trigger()`, however it doesn't make sense to call some or to listen to some. So only the recommended ones are set:
 
 
 
 ### init
+
+```js
+editor.on('init', function(){});
+```
 
 Triggered when the editor is initialized and all of the default actions are added. It initializes the menu within the <body>. It is highly discouraged to trigger it manually since some undesired actions might be called.
 
 
 ### action
 
+```js
+editor.on('action', function(){});
+```
+
 When any action is triggered. This can be really useful for tracking which actions are most used and which ones are not used at all for future changes  .
 
 
 ### action:<name>
+
+```js
+editor.on('action:<name>', function(){});
+editor.trigger('action:<name>');
+```
 
 A specific action by its name. These are added automagically when the `editor.add()` function is called as we can see in [the actions section](#actions). Adding a listener or triggering an action is easy.
 
@@ -206,25 +219,47 @@ $(".save").click(function(){
 
 A click or touch is performed somewhere
 
+```js
+editor.on('click', function(){});
+```
+
 
 ### refresh
 
-The content of the editor is re-read and parsed. This is continuously being triggered both with an interval and when several events happen.
+The content of the editor is re-read and parsed. This is continuously being triggered both with an interval and when several events happen. You might want to trigger with new events
+
+```js
+editor.on('refresh', function(){});
+editor.trigger('refresh');
+```
 
 
 ### select
 
 Triggers when the selection of text is changed
 
+```js
+editor.on('select', function(){});
+```
+
+
 
 ### key
 
 When a key from the keyboard is pressed
 
+```js
+editor.on('key', function(){});
+```
+
 
 ### shortcut
 
 When a registered shortcut is triggered
+
+```js
+editor.on('shortcut', function(){});
+```
 
 
 ### Others
@@ -238,9 +273,13 @@ There are some other events that are not so relevant for people developing *with
 - `menu:move`: reposition the menu to the current selection
 
 - `select:check`: checks whether the current selection has changed
+
 - `shortcut:add`: adds a new shortcut manually
 
-```js
-editor.trigger('menu:separator');
-```
 
+
+## Author, credits & License
+
+Originally created by Francisco Presencia. It started from [my old but popular answer on StackOverflow](http://stackoverflow.com/a/20471268/938236) and evolved into something that is loosely based on Medium's and CKEditor editors with extensibility and simplicity in mind.
+
+It is licensed under the MIT License as can be seen in the file `LICENSE` for everyone to use it.
