@@ -13,11 +13,13 @@
 Download the file `editor.js` and `editor.css` and include them within your code. Then we need to initialize the instance of the editor with a selector of the element (jquery-like):
 
 ```js
-var options = {};
+var options = { menu: 'menu' };
 var editor = new Editor("article", options);
 ```
 
-The rest of the code is structured mainly in few parts, the *action*, the *menu* and the *shortcut*. They are explained below, along with some others.
+Right now the only relevant option is `options.menu`, which contains the class name that will be assigned to the menu. This is optional in case the default `menu` conflicts with any part from your code. Remember to change the `editor.css` accordingly with this
+
+The rest of the code is structured mainly in few parts, the **action**, the **menu** and the **shortcut**. They are explained below, along with some others.
 
 
 
