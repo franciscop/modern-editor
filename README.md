@@ -10,25 +10,43 @@
 
 ## Getting started
 
-Download the file `editor.js` and include it within your code. Then we need to initialize the instance of the editor with a selector of the element (jquery-like):
+Download the file `editor.js` and `editor.css` and include them within your code. Then we need to initialize the instance of the editor with a selector of the element (jquery-like):
 
 ```js
 var options = {};
 var editor = new Editor("article", options);
 ```
 
+The rest of the code is structured mainly in few parts, the *action*, the *menu* and the *shortcut*. They are explained below, along with some others.
 
 
-## Create actions
 
-An action is something that can happen by several means. They are defined like this:
+## Action
+
+An action is something that can happen when the editor is loaded. It includes changing text from normal to bold, saving the current editor or any other actions that can occur to you.
+
+### Create actions
+
+An action is a function that has a `this` parameter of the full editor instance. Let's see a couple of actions:
+
+```js
+function bold(){
+  this.command('bold');
+}
+```
+
+> Note: `editor.command(command, text)` is an alias for `document.execCommand(command, showUi, text);`
+
+
+
+They are defined like this:
 
 ```js
 // Set a new action
 editor.action.add(name, {
   menu: {} || "" || false,          // The html or icon to show
   shortcut: {} || "" || false,      // The key for Ctrl+key or { key: "esc" }
-  action: function(){} || false     // Click or shortcut for that action
+  action: function(){} || false     // The action itself
 });
 ```
 
