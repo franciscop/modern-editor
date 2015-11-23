@@ -1,4 +1,4 @@
-![Modern Editor](https://raw.githubusercontent.com/franciscop/modern-editor/master/screenshot.png)
+[![Modern Editor](https://raw.githubusercontent.com/franciscop/modern-editor/master/screenshot.png)](http://www.francisco.io/editor/)
 
 > Click the image above for a larger version on mobile
 
