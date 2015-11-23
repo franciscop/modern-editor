@@ -11,10 +11,6 @@
 - **Tiny**: 1.6kb is small enough to provide no performance penalty for loading it.
 
 
-<a href="http://www.francisco.io/editor/" target="\_blank">
-  <img src="https://raw.githubusercontent.com/franciscop/modern-editor/master/demobutton.png" alt="Modern Editor Demo" />
-</a>
-
 
 ## Getting started
 
