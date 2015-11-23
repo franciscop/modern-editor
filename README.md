@@ -74,7 +74,7 @@ Also let's say that the `save` action can be a shortcut and a 'save' button:
 ```js
 var editor = new Editor('article');
 
-function save(){ /*...*/ }
+function save(editor){ /* ... same as above */ }
 
 editor.add('save', {
   shortcut: 'ctrl+s',
