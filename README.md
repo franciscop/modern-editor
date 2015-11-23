@@ -1,4 +1,7 @@
-[![Modern Editor](https://raw.githubusercontent.com/franciscop/modern-editor/master/screenshot.png)](http://www.francisco.io/editor/)
+
+<a href="http://www.francisco.io/editor/" target="\_blank">
+  <img src="https://raw.githubusercontent.com/franciscop/modern-editor/master/screenshot.png" alt="Modern Editor" />
+</a>
 
 > Click the image above for a larger version on mobile
 
