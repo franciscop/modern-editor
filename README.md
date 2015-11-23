@@ -54,7 +54,7 @@ function save(editor){
 }
 ```
 
-Now that we have both of the functions, we might decide in what situations we want to execute them. Let's say that we want the `bold` action to be a clickable, bold `**B**` (for the sake of it, I love that ctrl+b). Then we would add that action to the editor instance:
+Now that we have both of the functions, we might decide in what situations we want to execute them. Let's say that we want the `bold` action to be a clickable, bold **`B`** (for the sake of it, I love that ctrl+b). Then we would add that action to the editor instance:
 
 ```js
 // ... initialization as seen in the *getting started* section
