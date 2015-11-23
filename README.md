@@ -57,7 +57,7 @@ function save(editor){
 Now that we have both of the functions, we might decide in what situations we want to execute them. Let's say that we want the `bold` action to be a clickable, bold <kbd><strong>B</strong></kbd> in the menu (for the sake of it, as I love that ctrl+b). Then we add that action to the editor instance and assign the menu button:
 
 ```js
-// ... initialization as seen in the *getting started* section
+var editor = new Editor('article');
 
 editor.add('bold', {
   menu: '<strong>B</strong>',
@@ -72,9 +72,9 @@ Make sure the first parameter is a string, since this will be used later to refe
 Also let's say that the `save` action can be a shortcut and a 'save' button:
 
 ```js
-// ... initialization as seen in the *getting started* section
+var editor = new Editor('article');
 
-// ... the save function from before
+function save(){ /*...*/ }
 
 editor.add('save', {
   shortcut: 'ctrl+s',
