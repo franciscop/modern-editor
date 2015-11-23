@@ -155,12 +155,14 @@ var Editor = function(selector, options){
   this.on('menu:show', function(){
     this.menu.element.style.display = 'block';
     this.menu.element.visible = true;
+    this.menu.element.classList.add('visible');
   });
     
   // Hide the menu
   this.on('menu:hide', function(){
     this.menu.element.style.display = "none";
     this.menu.element.visible = false;
+    this.menu.element.classList.remove('visible');
   });
   
   // Position the menu correctly
