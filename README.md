@@ -17,7 +17,7 @@ var options = { menu: 'menu' };
 var editor = new Editor("article", options);
 ```
 
-Right now the only relevant option is `options.menu`, which contains the class name that will be assigned to the menu. This is optional in case the default `menu` conflicts with any part from your code. Remember to change the `editor.css` accordingly with this
+Right now the only relevant option is `options.menu`, which contains the class name that will be assigned to the menu. This is optional in case the default `menu` conflicts with any part from your code. Remember to change the file `editor.css` accordingly with this.
 
 The rest of the code is structured mainly in few parts, the **actions**, the **menu** and the **shortcuts**. They are explained below, along with some others.
 
@@ -25,11 +25,11 @@ The rest of the code is structured mainly in few parts, the **actions**, the **m
 
 ## Actions
 
-An action is something that can happen when the editor is loaded. It includes changing text from normal to bold, saving the current editor or any other actions that can occur to you.
+An action is something that can happen. It includes changing text from normal to bold, saving the current editor or any other actions that can occur to you.
 
 ### Create actions
 
-An action is a function that has a `this` parameter of the full editor instance. Let's see a couple of actions. For example, a simple one to make your text bold:
+An action is a function that receives as an argument the full editor instance. Let's see a couple of actions. For example, a simple one to make your text bold:
 
 ```js
 function bold(editor){
@@ -54,7 +54,7 @@ function save(editor){
 }
 ```
 
-Now that we have both of the functions, we might decide in what situations we want to execute them. Let's say that we want the `bold` action to be a clickable, bold <kbd><strong>B</strong></kbd> (for the sake of it, I love that ctrl+b). Then we add that action to the editor instance:
+Now that we have both of the functions, we might decide in what situations we want to execute them. Let's say that we want the `bold` action to be a clickable, bold <kbd><strong>B</strong></kbd> in the menu (for the sake of it, as I love that ctrl+b). Then we add that action to the editor instance and assign the menu button:
 
 ```js
 // ... initialization as seen in the *getting started* section
@@ -66,9 +66,24 @@ editor.add('bold', {
 });
 ```
 
+Make sure the first parameter is a string, since this will be used later to reference the action. This will display an element in the popup menu that contains the `<strong>B</strong>` parsed as html. See more information about how to format the `menu` below in the [Menu section](#menu).
 
 
-Also let's say that the `save` action can be a shortcut 
+Also let's say that the `save` action can be a shortcut and a 'save' button:
+
+```js
+// ... initialization as seen in the *getting started* section
+
+// ... the save function from before
+
+editor.add('save', {
+  shortcut: 'ctrl+s',
+  action: save
+  }
+});
+```
+
+
 
 
 They are defined like this:
