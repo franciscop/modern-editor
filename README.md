@@ -19,26 +19,56 @@ var editor = new Editor("article", options);
 
 Right now the only relevant option is `options.menu`, which contains the class name that will be assigned to the menu. This is optional in case the default `menu` conflicts with any part from your code. Remember to change the `editor.css` accordingly with this
 
-The rest of the code is structured mainly in few parts, the **action**, the **menu** and the **shortcut**. They are explained below, along with some others.
+The rest of the code is structured mainly in few parts, the **actions**, the **menu** and the **shortcuts**. They are explained below, along with some others.
 
 
 
-## Action
+## Actions
 
 An action is something that can happen when the editor is loaded. It includes changing text from normal to bold, saving the current editor or any other actions that can occur to you.
 
 ### Create actions
 
-An action is a function that has a `this` parameter of the full editor instance. Let's see a couple of actions:
+An action is a function that has a `this` parameter of the full editor instance. Let's see a couple of actions. For example, a simple one to make your text bold:
 
 ```js
-function bold(){
-  this.command('bold');
+function bold(editor){
+  editor.command('bold');
 }
 ```
 
 > Note: `editor.command(command, text)` is an alias for `document.execCommand(command, showUi, text);`
 
+Now a more complex one using jquery to save your changes and remove the editability of the html afterwards:
+
+```js
+function save(editor){
+  var html = editor.element.innerHTML;
+  $.post('/save', html, function(res){
+    if (res.error) {
+      alert(res.error);
+    } else {
+      $("article").attr('contenteditable', false);
+    }
+  }, 'json');
+}
+```
+
+Now that we have both of the functions, we might decide in what situations we want to execute them. Let's say that we want the `bold` action to be a clickable, bold `**B**` (for the sake of it, I love that ctrl+b). Then we would add that action to the editor instance:
+
+```js
+// ... initialization as seen in the *getting started* section
+
+editor.add('bold', {
+  menu: '<strong>B</strong>',
+  action: (editor) => editor.command('bold')
+  }
+});
+```
+
+
+
+Also let's say that the `save` action can be a shortcut 
 
 
 They are defined like this:

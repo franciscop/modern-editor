@@ -4,7 +4,7 @@ var editor = new Editor("article");
 // Register a new action called "bold"
 editor.add("bold", {
   menu: "<strong>B</strong>", shortcut: "ctrl+b",
-  action: function() {
+  action: function(e) {
     this.command("bold");
   }
 });

@@ -84,7 +84,7 @@ var Editor = function(selector, options){
     options.init.call(editor);
     
     // Add the action to the action event list like action:save
-    editor.on('action:' + name, options.action.bind(editor));
+    editor.on('action:' + name, options.action.bind(editor, editor));
     
     // Add the action to the action event list like action:save
     editor.on('destroy', options.destroy.bind(editor));
