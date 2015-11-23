@@ -3,12 +3,17 @@
   <img src="https://raw.githubusercontent.com/franciscop/modern-editor/master/screenshot.png" alt="Modern Editor" />
 </a>
 
-> Click the image above for a larger version on mobile
+> Click the image above for [an interactive demo](http://www.francisco.io/editor/)
 
 - **Event-based**: most things are an event. For example, when the selection of the text of the editor changes the event `editor.on('select', function(){});` is triggered
 - **Extensible**: there are several ways of doing the same thing but one is recommended for consistence. The core is an event api on top of which the editor is built.
 - **Defaults**: some common actions are already set and waiting for you to activate them, such as `bold`, `italics`, `link`, etc.
 - **Tiny**: 1.6kb is small enough to provide no performance penalty for loading it.
+
+
+<a href="http://www.francisco.io/editor/" target="\_blank">
+  <img src="https://raw.githubusercontent.com/franciscop/modern-editor/master/demobutton.png" alt="Modern Editor Demo" />
+</a>
 
 
 ## Getting started
