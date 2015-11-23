@@ -116,14 +116,10 @@ var editor = new Editor("article");
 
 // Save the action 'save'
 editor.add("save", {
-  action: function(editor){
-    $.post('/save', editor.element.innerHTML, function(){});
-  }
+  action: (editor) => $.post('/save', editor.element.innerHTML);
 });
 
-setInterval(function(){
-  editor.trigger('action:save');
-}, 1000 * 60);
+setInterval(() => editor.trigger('action:save'), 1000 * 60);
 ```
 
 > you can even add the action manually, but it's not recommended so you'll need to dig in the code to see how it's possible (;
@@ -133,7 +129,7 @@ setInterval(function(){
 
 ### Default actions
 
-There ~~are~~ will be some common actions defined by default. They aren't active until you set them up, which is easy:
+There ~~are~~ *will be* some common actions defined by default. They aren't active until you set them up, which is easy:
 
 ```js
 // Add a button to the popup menu for formatting as italics

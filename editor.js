@@ -340,6 +340,8 @@ var Editor = function(selector, options){
 
 
 
+
+
 // Select elements in a similar fashion to jQuery without requiring it
 Editor.prototype.s = function(selector, context){
   context = context || document;
