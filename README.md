@@ -106,6 +106,17 @@ editor.action.add(name, {
 `action`: the action that will be called when the `menu` item is clicked, when the `shortcut` is activated or when the action is triggered by other means (`editor.trigger('action:<name>')`). If it's not set, then when it's called it will do nothing
 
 
+
+
+## Menu
+
+
+## Shortcuts
+
+
+
+
+
 ### Default actions
 
 These actions are added by default but not activated until you set them up. Setting them up is really easy:
