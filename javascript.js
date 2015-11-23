@@ -38,18 +38,12 @@ editor.add("code", {
 });
 
 // Register a new action called "italic"
-editor.add("code", {
+editor.add('info', {
   menu: "<i class='icon-help'></i>",
-  action: function() {
-    alert("Some help");
+  action: function(){
+    window.open("https://github.com/franciscop/modern-editor", "_blank");
   }
 });
-
-// Register a new action called "italic"
-editor.on('action:cancel', function(){
-  this.trigger('menu:hide');
-});
-editor.trigger('shortcut:add', { shortcut: 'esc', action: 'cancel' });
 
 
   

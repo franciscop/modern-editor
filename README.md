@@ -19,13 +19,35 @@ var editor = new Editor("article", options);
 
 Right now the only relevant option is `options.menu`, which contains the class name that will be assigned to the menu. This is optional in case the default `menu` conflicts with any part from your code. Remember to change the file `editor.css` accordingly with this.
 
-The rest of the code is structured mainly in few parts, the **actions**, the **menu** and the **shortcuts**. They are explained below, along with some others.
+The rest of the code is structured mainly in few parts, the [**actions**](#actions), the [**menu**](#menu), the [**shortcuts**](#shortcuts), the [**events**](#events) and few others.
+
+
+### Reference
+
+```js
+// Set a new action
+editor.action.add(name, {
+  menu: "" || false,          // The html or icon to show
+  shortcut: "" || false,      // The key for Ctrl+key or { key: "esc" }
+  action: function(){} || false     // The action itself
+});
+```
+
+`name`: unique name for referencing the current action. For example, an action that you named `save` can be triggered later on by calling `editor.trigger("action:save");`
+
+`menu`: the item html in the visible menu. For example, if you want a **bold** button you can set it like this: `menu: "<strong>B</strong>"`. [Read more about the menu](#menu)
+
+`shortcut`: a keyboard set a shortcut that triggers the action. For example: `shortcut: "ctrl+b"`. [Read more about shortcuts](#shortcuts)
+
+`action`: the action that will be called when the `menu` item is clicked, when the `shortcut` is activated or when the action is triggered by other means (`editor.trigger('action:<name>')`). [Read more about the actions](#actions)
+
 
 
 
 ## Actions
 
 An action is something that can happen. It includes changing text from normal to bold, saving the current editor or any other actions that can occur to you.
+
 
 ### Create actions
 
@@ -39,7 +61,8 @@ function bold(editor){
 
 > Note: `editor.command(command, text)` is an alias for `document.execCommand(command, showUi, text);`
 
-Now a more complex one using jquery to save your changes and remove the editability of the html afterwards:
+
+A more complex one using jquery to save your changes and remove the editability of the html afterwards:
 
 ```js
 function save(editor){
@@ -84,31 +107,57 @@ editor.add('save', {
 ```
 
 
+### Trigger actions
 
-
-They are defined like this:
+Sometimes you might want to trigger an action manually. For instance, you might want to save the document automatically every minute. For doing this you can trigger the action manually from the code:
 
 ```js
-// Set a new action
-editor.action.add(name, {
-  menu: {} || "" || false,          // The html or icon to show
-  shortcut: {} || "" || false,      // The key for Ctrl+key or { key: "esc" }
-  action: function(){} || false     // The action itself
+var editor = new Editor("article");
+
+// Save the action 'save'
+editor.add("save", {
+  action: function(editor){
+    $.post('/save', editor.element.innerHTML, function(){});
+  }
 });
+
+setInterval(function(){
+  editor.trigger('action:save');
+}, 1000 * 60);
 ```
 
-`name`: this is the most important part. It defines the action name for using it in several parts. For example, an action that you named `save` can be triggered later on by calling `editor.trigger("action:save");`
+> you can even add the action manually, but it's not recommended so you'll need to dig in the code to see how it's possible (;
 
-`menu`: set this variable to add the element to the visible menu. For example, if you want a **bold** button you can set it like this: `options: { menu: "<strong>B</strong>" }`.
 
-`shortcut`: set a shortcut that triggers the action. Example: `options: { menu: "esc" }` or `options: { menu: "ctrl+b" }`
 
-`action`: the action that will be called when the `menu` item is clicked, when the `shortcut` is activated or when the action is triggered by other means (`editor.trigger('action:<name>')`). If it's not set, then when it's called it will do nothing
+
+### Default actions
+
+There ~~are~~ will be some common actions defined by default. They aren't active until you set them up, which is easy:
+
+```js
+// Add a button to the popup menu for formatting as italics
+editor.add('default:italics', { menu: '<em>i</em>' });
+
+// Add a shortcut to the editor for formatting as bold
+editor.add('default:bold', { shortcut: 'ctrl+b' });
+
+// ...
+```
+
+You can trigger them as usual, `action:` prefix for the action name:
+
+```js
+editor.trigger('action:default:bold');
+```
+
 
 
 
 
 ## Menu
+
+
 
 
 ## Shortcuts
@@ -117,21 +166,8 @@ editor.action.add(name, {
 
 
 
-### Default actions
 
-These actions are added by default but not activated until you set them up. Setting them up is really easy:
-
-```js
-// Add a button to the popup menu
-editor.add('default:italics', { menu: '<em>i</em>' });
-
-// Add a shortcut to the editor
-editor.add('default:bold', { shortcut: 'ctrl+b' });
-```
-
-
-
-## API (events)
+## Events
 
 These are the events that the API defines. You can easily create more with `editor.on("", function(){})` as we can see at the end.
 
@@ -139,21 +175,72 @@ These are the events that the API defines. You can easily create more with `edit
 
 ### init
 
-Triggered when the editor is initialized and all of the default actions are added. It initializes the menu within the <body>
+Triggered when the editor is initialized and all of the default actions are added. It initializes the menu within the <body>. It is highly discouraged to trigger it manually since some undesired actions might be called.
+
+
+### action
+
+When any action is triggered. This can be really useful for tracking which actions are most used and which ones are not used at all for future changes  .
 
 
 ### action:<name>
 
-A specific action by its name. These are added automagically when the `editor.add()` function is called. For example, if we want to save we can do it like this:
+A specific action by its name. These are added automagically when the `editor.add()` function is called as we can see in [the actions section](#actions). Adding a listener or triggering an action is easy.
 
 ```js
 var editor = new Editor('article');
 editor.add('save', { action: function(){ alert("Saving..."); }});
 
+// Adding another listener
+editor.on('action:save', function(){
+  console.log('Saving...');
+});
+
+// Adding a manual trigger
 $(".save").click(function(){
   editor.trigger('action:save');
 });
 ```
 
+### click
 
+A click or touch is performed somewhere
+
+
+### refresh
+
+The content of the editor is re-read and parsed. This is continuously being triggered both with an interval and when several events happen.
+
+
+### select
+
+Triggers when the selection of text is changed
+
+
+### key
+
+When a key from the keyboard is pressed
+
+
+### shortcut
+
+When a registered shortcut is triggered
+
+
+### Others
+
+There are some other events that are not so relevant for people developing *with* the Modern Editor, but they are relevant for people delving deep into the code of it. These are **NOT** guaranteed to stay the same within a major number of semver:
+
+- `menu:add`: when an item is added to the menu
+- `menu:separator`: adds a separator for the menu
+- `menu:show`: display the menu
+- `menu:hide`: hide the menu
+- `menu:move`: reposition the menu to the current selection
+
+- `select:check`: checks whether the current selection has changed
+- `shortcut:add`: adds a new shortcut manually
+
+```js
+editor.trigger('menu:separator');
+```
 

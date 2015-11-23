@@ -312,6 +312,7 @@ var Editor = function(selector, options){
   });
   
   this.on("shortcut", function(short){
+    editor.trigger('action');
     editor.trigger('action:' + short.action);
   });
   
