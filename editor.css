@@ -14,24 +14,22 @@
   padding: 0;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+  margin-top: -2.5em;
 }
 
 .visible {
   animation-name: fadeIn;
   animation-iteration-count: 1;
   animation-timing-function: ease-in;
-  animation-duration: .15s;
-  margin-top: -2.2em;
+  animation-duration: .1s;
 }
 
 @keyframes fadeIn {
   0% {
-    /*transform: scale(.9);*/
-    transform: translateY(-1.1em) rotateX(-90deg);
+    transform: translateY(-1.25em) rotateX(-90deg);
     opacity: .2;
   }
   100% {
-    /*transform: scale(1);*/
     transform: translateY(0) rotateX(0deg);
     opacity: 1;
   }
