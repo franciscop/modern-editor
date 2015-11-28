@@ -8,7 +8,7 @@ var Editor = function(selector, options){
     options = typeof options === 'object' ? options : {};
     
     Object.keys(def).forEach(function(key) {
-      if (typeof o ptions[key] === 'undefined') {
+      if (typeof options[key] === 'undefined') {
         options[key] = def[key];
       }
     });
