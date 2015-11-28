@@ -31,15 +31,6 @@ editor.add("link", {
   }
 });
 
-// // Register a new action called "code"
-// editor.add("code", {
-//   menu: "<i class='icon-terminal'></i>", shortcut: "ctrl+`",
-//   action: function(editor) {
-//     editor.command("insertHtml", "<code>" + this.selection.text + "</code>");
-//   }
-// });
-
-
 editor.add("code", {
   menu: "<i class='icon-terminal'></i>", shortcut: "ctrl+`",
   action: function(editor) {
