@@ -17,7 +17,7 @@ editor.add("italic", {
   }
 });
 
-// Register a new action called "link" with 
+// Register a new action called "link"
 editor.add("link", {
   menu: "<i class='icon-link'></i>", shortcut: "ctrl+k",
   action: function(editor) {
@@ -34,7 +34,7 @@ editor.add("link", {
 editor.add("code", {
   menu: "<i class='icon-terminal'></i>", shortcut: "ctrl+`",
   action: function(editor) {
-    editor.tag("code", { class: "bla" });
+    editor.tag("code");
   }
 });
 
