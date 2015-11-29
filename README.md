@@ -92,7 +92,6 @@ function save(editor){
     } else {
       $("article").attr('contenteditable', false);
       editor.options.active = false;
-      editor.trigger('option:active', false);
     }
   }, 'json');
 }
