@@ -33,9 +33,11 @@ var Editor = function(selector, options){
     menu: 'menu',
     
     // Delay for each of the text selections checks (there's no event onselect)
-    delay: 200
+    delay: 200,
+    
+    // Default active status
+    active: true
   });
-  
   
   
   
@@ -153,9 +155,12 @@ var Editor = function(selector, options){
   
   // Show the menu
   this.on('menu:show', function(){
-    this.menu.element.style.display = 'block';
-    this.menu.element.visible = true;
-    this.menu.element.classList.add('visible');
+    
+    if (this.options.active) {
+      this.menu.element.style.display = 'block';
+      this.menu.element.visible = true;
+      this.menu.element.classList.add('visible');
+    }
   });
     
   // Hide the menu
@@ -380,7 +385,7 @@ Editor.prototype.tag = function(name, attr){
       tag += " " + key + '="' + (attr[key] || "") + '"';
     }
     tag += ">" + this.selection.text + "</" + name + ">";
-    editor.command("insertHtml", tag);
+    this.command("insertHtml", tag);
     
     var el = this.s('.' + className);
     el.classList.remove(className);

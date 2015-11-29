@@ -21,7 +21,22 @@ var options = { menu: 'menu' };
 var editor = new Editor("article", options);
 ```
 
-Right now the only relevant option is `options.menu`, which contains the class name that will be assigned to the menu. This is optional in case the default `menu` conflicts with any part from your code. Remember to change the file `editor.css` accordingly with this.
+
+### Options
+
+These are the available options with their defaults:
+
+```js
+var options = {
+  
+  // The class that will be assigned to the menu (in case there's a conflict).
+  // If you modify it, remember to modify also the editor.css
+  menu: 'menu',
+  
+  // Show or not the menu when the action menu:show is triggered
+  active: true,
+};
+```
 
 The rest of the code is structured mainly in few parts, the [**actions**](#actions), the [**menu**](#menu), the [**shortcuts**](#shortcuts), the [**events**](#events) and few others.
 
@@ -30,7 +45,7 @@ The rest of the code is structured mainly in few parts, the [**actions**](#actio
 
 ```js
 // Set a new action
-editor.action.add(name, {
+editor.add(name, {
   menu: "" || false,          // The html or icon to show
   shortcut: "" || false,      // The key for Ctrl+key or { key: "esc" }
   action: function(){} || false     // The action itself
@@ -76,6 +91,8 @@ function save(editor){
       alert(res.error);
     } else {
       $("article").attr('contenteditable', false);
+      editor.options.active = false;
+      editor.trigger('option:active', false);
     }
   }, 'json');
 }
@@ -157,12 +174,12 @@ editor.trigger('action:default:bold');
 
 ## Menu
 
-
+WIP
 
 
 ## Shortcuts
 
-
+WIP
 
 
 
@@ -280,6 +297,6 @@ There are some other events that are not so relevant for people developing *with
 
 ## Author, credits & License
 
-Originally created by Francisco Presencia. It started from [my old but popular answer on StackOverflow](http://stackoverflow.com/a/20471268/938236) and evolved into something that is loosely based on Medium's and CKEditor editors with extensibility and simplicity in mind.
+Created by Francisco Presencia. It started from [my old but popular answer on StackOverflow](http://stackoverflow.com/a/20471268/938236) and evolved into something that is loosely based on Medium's and CKEditor editors with extensibility and simplicity in mind.
 
 It is licensed under the MIT License as can be seen in the file `LICENSE` for everyone to use it.
