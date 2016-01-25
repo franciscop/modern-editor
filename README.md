@@ -195,7 +195,7 @@ These are the events that the API defines. You can easily create more with `edit
 editor.on('init', function(){});
 ```
 
-Triggered when the editor is initialized and all of the default actions are added. It initializes the menu within the <body>. It is highly discouraged to trigger it manually since some undesired actions might be called.
+Triggered when the editor is initialized and all of the default actions are added. It initializes the menu within the `<body>`. It is highly discouraged to trigger it manually since some undesired actions might be called.
 
 
 ### action

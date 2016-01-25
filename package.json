@@ -1,0 +1,38 @@
+{
+  "name": "modern-editor",
+  "version": "0.1.0",
+  "authors": [
+    "Francisco Presencia <developerfrancisco@hotmail.com>"
+  ],
+  "description": "Complete and modular text editor for the web",
+  "main": "umbrella.min.js",
+  "keywords": [
+    "edit",
+    "editor",
+    "text",
+    "contenteditable",
+    "html",
+    "rich"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/franciscop/modern-editor/issues"
+  },
+  "scripts": {
+    "test": "mocha-phantomjs ./tests.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/franciscop/modern-editor.git"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-jade": "^0.15.0",
+    "grunt-contrib-uglify": "^0.11.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-markdown": "^0.7.0",
+    "grunt-mocha-phantomjs": "^2.0.1",
+    "mocha-phantomjs": "^4.0.2"
+  }
+}
