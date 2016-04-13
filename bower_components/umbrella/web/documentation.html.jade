@@ -1,0 +1,37 @@
+extends layout
+
+block content
+  main.documentation#home
+    section.row
+      aside
+        a.top.pseudo.button(href="#home" tabindex="-1") ▲ Up you go ▲
+        h2 Contents
+      article
+        include:markdown ../documentation.md
+  
+  script(src="umbrella.min.js")
+  script.
+    u('h2[id]').each(function(node){
+      u(node).attr('id', u(node).attr('id').replace(/-/g, ''));
+    });
+  
+    u('article h2').each(function(node){
+      var href = 'href="#' + u(node).attr('id') + '" ';
+      var classes = 'class="pseudo button stack" ';
+      var html = u(node).html();
+      u('aside').append('<a ' + classes + href + '>' + html + '</a>');
+    });
+    
+    u('aside a').on('click', function(e){
+      try {
+        var to = u(e.currentTarget).attr('href');
+        u(to).first().scrollIntoView({behavior: "smooth"});
+        e.preventDefault();
+        history.replaceState(null, '', to);
+      } catch(err) {}
+    });
+    
+    u([window]).on('scroll', function(){
+      var top = this.scrollY || document.documentElement.scrollTop;
+      u('.top').toggleClass('visible', top > 1000);
+    }).trigger('scroll');

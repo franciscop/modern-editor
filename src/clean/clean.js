@@ -1,36 +1,37 @@
 Editor.prototype.clean = function(){
-  
+
+  var self = this;
   this.clean.editor = this;
   this.clean.blocks = [];
-  
+
   this.on('refresh', function(){
     this.trigger('clean');
   });
-  
+
   // Clean up the html
   this.on('clean', function(){
-    
+
     // Call the single elements
     u(this.element).children().singles(function(node){
-      editor.trigger('clean:single', node);
+      self.trigger('editor:clean:single', node);
     });
-    
+
     u(this.element).children().empty(function(node){
-      editor.trigger('clean:empty', node);
+      self.trigger('clean:empty', node);
     });
   });
-  
+
   // Last defense for cleanup
   // Make sure all top-level elements are valid blocks or wrap them in <p>
-  this.on('clean:after', function(){
-    
+  this.on('clean:post', function(){
+
     var ed = u(editor.element);
-    
+
     // Wrap any of the invalid blocks
     if (this.options.blocks) {
       ed.children().filter(this.clean.filter).each(this.clean.wrap);
     }
-    
+
     if (!ed.children().nodes.length && ed.html() !== "") {
       ed.html('<p>' + ed.html() + '</p>');
     }
@@ -80,9 +81,7 @@ u.prototype.wrap = function(el){
 };
 
 u.prototype.content = function(){
-  
   var self = this;
-  
   return this.join(function(node){
     return self.slice(node.childNodes);
   });
