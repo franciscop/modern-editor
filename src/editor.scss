@@ -1,0 +1,100 @@
+$border-radius: 5px !default;
+
+
+@keyframes fadeIn {
+  0% {
+    opacity: .2;
+    transform: translateY(-3.25em) rotateX(-90deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(-2em) rotateX(0deg);
+  }
+}
+
+.menu {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: $border-radius;
+  box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+  color: #333;
+  display: none;
+  font-family: Arial, Helvetica, sans-serif;
+  list-style: none;
+  margin: -.5em 0 0;
+  padding: 0;
+  position: absolute;
+  transform: translateY(-2em);
+  white-space: nowrap;
+  z-index: 1000;
+  overflow: hidden;
+
+  &.visible {
+    animation-duration: .2s;
+    animation-iteration-count: 1;
+    animation-name: fadeIn;
+    animation-timing-function: ease-in;
+  }
+
+
+  > * {
+    box-sizing: content-box;
+    cursor: pointer;
+    display: block;
+    float: left;
+    height: 1em;
+    line-height: 1em;
+    margin: 0;
+    padding: .5em .6em;
+    text-align: center;
+    transition: all .3s ease;
+  }
+
+  .action {
+    min-width: 1em;
+
+    &.select {
+      padding: 0;
+    }
+  }
+
+  .separator {
+    border-right: 1px solid #ccc;
+    padding: .5em 0;
+  }
+
+  .action:hover {
+    background-color: #def;
+  }
+
+  .bold {
+    font-weight: bold;
+  }
+
+  .italic {
+    font-style: italic;
+  }
+
+  select {
+    height: 100%;
+    display: block;
+    margin: 0;
+    height: 2em;
+    border-radius: 0px;
+    border: 0px none;
+    padding-right: 25px;
+
+    &:hover {
+      background-color: #def;
+    }
+
+    &:focus {
+      border: 0px none;
+    }
+
+    option {
+      background: #fff;
+    }
+  }
+}

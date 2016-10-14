@@ -1,3 +1,4 @@
+
 // SHORTCUTS
 Editor.prototype.shortcuts = function(){
   var editor = this;
@@ -6,16 +7,16 @@ Editor.prototype.shortcuts = function(){
   var mousetrap = new Mousetrap();
   mousetrap.stopCallback = function(){ return false; };
 
-  this.on('shortcut:add', function(e, data){
-    if (!data) return false;
+  this.on('shortcut:add', function(data){
+    if (!data || !data.shortcut) return false;
     mousetrap.bind(data.shortcut, function(e){
       e.preventDefault();
-      editor.trigger('shortcut', data.action);
+      editor.trigger('shortcut', data.action, e);
     });
   });
 
-  this.on("shortcut", function(e){
-    editor.trigger('action:' + e.detail);
+  this.on("shortcut", function(data, e){
+    editor.trigger('action:' + data, e);
   });
 
   u(this.element).on("key", function(e){

@@ -1,72 +1,67 @@
-
-.menu {
-  position: absolute;
-  margin: 0;
-  list-style: none;
-  display: none;
-  z-index: 1000;
-  overflow: hidden;
-  border: 1px solid #CCC;
-  white-space: nowrap;
-  font-family: serif;
-  background: #FFF;
-  color: #333;
-  padding: 0;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, .2);
-  margin-top: -.5em;
-  transform: translateY(-2em);
-}
-
-.visible {
-  animation-name: fadeIn;
-  animation-iteration-count: 1;
-  animation-timing-function: ease-in;
-  animation-duration: .2s;
-}
-
 @keyframes fadeIn {
   0% {
-    transform: translateY(-3.25em) rotateX(-90deg);
     opacity: .2;
-  }
+    transform: translateY(-3.25em) rotateX(-90deg); }
   100% {
-    transform: translateY(-2em) rotateX(0deg);
     opacity: 1;
-  }
-}
+    transform: translateY(-2em) rotateX(0deg); } }
 
-.menu > * {
-  text-align: center;
-  display: block;
-  float: left;
-  cursor: pointer;
-  margin: 0;
-  box-sizing: content-box;
-  height: 1em;
-  line-height: 1em;
-  padding: .5em .6em;
-}
-
-.menu .action {
-  min-width: 1em;
-}
-
-.menu .separator {
-  border-right: 1px solid #ccc;
-  padding: .5em 0;
-}
-
-.menu .action:hover {
-  background-color: #DEF;
-}
-
-.menu .bold {
-  font-weight: bold;
-}
-.menu .italic {
-  font-style: italic;
-}
-.link {
-  font-family: bold;
-}
+.menu {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  color: #333;
+  display: none;
+  font-family: Arial, Helvetica, sans-serif;
+  list-style: none;
+  margin: -.5em 0 0;
+  padding: 0;
+  position: absolute;
+  transform: translateY(-2em);
+  white-space: nowrap;
+  z-index: 1000;
+  overflow: hidden; }
+  .menu.visible {
+    animation-duration: .2s;
+    animation-iteration-count: 1;
+    animation-name: fadeIn;
+    animation-timing-function: ease-in; }
+  .menu > * {
+    box-sizing: content-box;
+    cursor: pointer;
+    display: block;
+    float: left;
+    height: 1em;
+    line-height: 1em;
+    margin: 0;
+    padding: .5em .6em;
+    text-align: center;
+    transition: all .3s ease; }
+  .menu .action {
+    min-width: 1em; }
+    .menu .action.select {
+      padding: 0; }
+  .menu .separator {
+    border-right: 1px solid #ccc;
+    padding: .5em 0; }
+  .menu .action:hover {
+    background-color: #def; }
+  .menu .bold {
+    font-weight: bold; }
+  .menu .italic {
+    font-style: italic; }
+  .menu select {
+    height: 100%;
+    display: block;
+    margin: 0;
+    height: 2em;
+    border-radius: 0px;
+    border: 0px none;
+    padding-right: 25px; }
+    .menu select:hover {
+      background-color: #def; }
+    .menu select:focus {
+      border: 0px none; }
+    .menu select option {
+      background: #fff; }

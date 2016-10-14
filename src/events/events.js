@@ -1,16 +1,19 @@
 // Events
-// Add one of the events
+// All of the current events
+Editor.prototype.events = {};
+
+// Transparently redirect events to Umbrella
 Editor.prototype.on = function(name, callback){
-  if (this.element) {
-    u(this.element).on('editor:' + name, callback.bind(this));
-  }
+  u(this.element).on('editor:' + name, function(e) {
+    return callback.apply(this, e.detail);
+  });
 };
 
-// Trigger one of the events
-Editor.prototype.trigger = function(name, event){
-  if (this.element) {
-    u(this.element).trigger('editor:' + name + ':pre', event);
-    u(this.element).trigger('editor:' + name, event);
-    u(this.element).trigger('editor:' + name + ':post', event);
-  }
+// Handle event triggering with :before and :after
+Editor.prototype.trigger = function(name){
+  var data = [].slice.call(arguments, 1);
+  var el = u(this.element);
+  el.trigger.apply(el, ['editor:' + name + ':before'].concat(data));
+  el.trigger.apply(el, ['editor:' + name].concat(data));
+  el.trigger.apply(el, ['editor:' + name + ':after'].concat(data));
 };

@@ -1,15 +1,16 @@
 
+// Tag
 Editor.prototype.tag = function(name, attr){
-  
+
   name = name.toLowerCase();
-  
+
   var sel = this.selection.element;
   var selTag = sel.tagName.toLowerCase();
-  
+
   // If the one we want to add is already added AND there're no attributes
   // if there's attributes we can assume that we want to change it, not delete it
   if (selTag === name && !attr) {
-    
+
     // Don't allow including one tag into itself
     if (sel.textContent === this.selection.text) {
       this.selection.element.outerHTML = this.selection.text;
@@ -26,20 +27,19 @@ Editor.prototype.tag = function(name, attr){
     }
     tag += ">" + this.selection.text + "</" + name + ">";
     this.command("insertHtml", tag);
-    
+
     var el = u('.' + className).first();
     el.classList.remove(className);
     if (el.classList.length === 0)
       el.removeAttribute('class');
-    
+
     range = document.createRange();
     range.selectNodeContents(el);
-    
+
     var selection = window.getSelection();
     selection.removeAllRanges();
     selection.addRange(range);
   }
-  
+
   this.trigger('refresh');
 };
-

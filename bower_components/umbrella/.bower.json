@@ -1,6 +1,6 @@
 {
   "name": "umbrella",
-  "version": "2.0.4",
+  "version": "2.6.7",
   "homepage": "http://umbrellajs.com/",
   "authors": [
     "Francisco Presencia <developerfrancisco@hotmail.com>"
@@ -24,14 +24,14 @@
     "bower_components",
     "package.json"
   ],
-  "_release": "2.0.4",
+  "_release": "2.6.7",
   "_resolution": {
     "type": "version",
-    "tag": "2.0.4",
-    "commit": "6985e267716a022b0aa0a7021e3cfc280bdd4e52"
+    "tag": "2.6.7",
+    "commit": "d8e9620e8737c86ce5e625bfe649b2e1117b74ee"
   },
   "_source": "https://github.com/umbrellajs/umbrella.git",
-  "_target": "^2.0.4",
+  "_target": "^2.6.7",
   "_originalSource": "umbrella",
   "_direct": true
 }

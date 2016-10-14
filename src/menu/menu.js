@@ -1,7 +1,6 @@
 // Menu
-Editor.prototype.menu = function(name){
 
-  // Default values
+Editor.prototype.menu = function(name){
   this.menu.editor = this;
   this.menu.visible = false;
 
@@ -15,21 +14,65 @@ Editor.prototype.menu = function(name){
   this.menu.events();
 };
 
+function generate(element, editor){
+  var structure = element.html;
+
+  var li = u('<li>').addClass('action').attr({
+    title: element.title,
+    'data-action': element.action
+  });
+
+  switch(element.type){
+    case 'none':
+      return li.html(element.html).first();
+    case 'button':
+      return li.addClass('simple').html(element.html).on('click', function(e){
+        if (!element.defaults) {
+          e.preventDefault();
+        }
+        editor.trigger('action');
+        editor.trigger('action:' + element.action);
+      }).first();
+    case 'select':
+      var select = u('<select>').append(function(key) {
+        return '<option value="'+key+'">'+structure[key] +'</option>'
+      }, Object.keys(structure)).on('change', function(e){
+        editor.trigger('action');
+        editor.trigger('action:' + element.action, e);
+      });
+      return li.addClass('select').append(select).first();
+  };
+
+  // Check if it's an object http://stackoverflow.com/a/22482737/938236
+  if (structure === Object(structure)) {
+    var list = u('<li class="dropdown action">').append().first();
+    return list;
+  }
+  return('<a href="test">Hi there</a>');
+}
 
 
 // Add an element to the menu
-Editor.prototype.menu.add = function(element){
+Editor.prototype.menu.add = function(element, options){
+
+  // Default options for the menu
+  element = element.html ? element : {
+    html: JSON.parse(JSON.stringify(element)),
+    type: element.type || typeof element === 'string' ? 'button' : 'select'
+  };
+  element.type = element.type || 'none';
+  element.title = (options.shortcut ? '[' + options.shortcut + '] ' : '') + options.name;
+  element.action = element.action || options.name;
+
   var editor = this.editor;
-  var li = u('<li>').attr({
-    'class': 'action',
-    'title': element.title,
-    'data-action': element.action
-  }).on('click', function(e){
-    e.preventDefault();
-    editor.trigger('action');
-    editor.trigger('action:' + element.action);
-  }).html(element.html || "");
-  u(this.element).append(li)
+  if (element instanceof Array) {
+    element = element[0];
+  }
+
+  var item = generate(element, editor);
+  this.element.appendChild(item);
+  this.editor.menu.elements = this.editor.menu.elements || {};
+  this.editor.menu.elements[element.action] = u(this.element).children().children().last();
 }
 
 // Add a separator between two elements from the menu
@@ -82,8 +125,8 @@ Editor.prototype.menu.events = function(){
   var menu = this;
 
   // Add a separator between two elements from the menu
-  editor.on("menu:add", function(e, element){
-    menu.add(element);
+  editor.on("menu:add", function(element, opt){
+    menu.add.call(menu, element, opt);
   });
 
   // Add a separator between two elements from the menu
@@ -106,11 +149,20 @@ Editor.prototype.menu.events = function(){
     menu.move();
   });
 
+  // Avoid deselecting text when clicking on the menu
+  u(menu.element).on('mousedown', function(e){
+    // Only if it was not a select
+    if (u(e.target).closest('select').length === 0) {
+      e.preventDefault();
+    }
+  });
+
   // On mousedown check whether or not we click on the menu
-  editor.on("click", function(orig, e) {
+  u('body').on("click", function (e) {
 
     // Don't unselect text when clicking on the menu
-    if (menu.element && menu.element.contains(e.target)) {
+    if (menu.element && menu.element.contains(e.currentTarget)) {
+      console.log("Prevented shortcut on click");
       e.preventDefault();
     }
   });

@@ -4,6 +4,10 @@ var expect = chai.expect;
 // the tests for this function should fail
 var work = true;
 
+var wrap = function(cb){
+  cb();
+}
+
 // Check whether or not the element has a class
 // - cls: the classes that should be checked
 // - negate: whether or not the class should be present
@@ -125,6 +129,15 @@ describe("u()", function() {
     expect(u(inst).length).to.equal(1);
     expect(u(inst)).to.equal(inst);
   });
+
+  // it("accepts a function", function() {
+  //   expect(u(function(){}).first()).to.equal(false);
+  // });
+  //
+  // it("generates some html", function() {
+  //   expect(u(function(node, i){
+  //     return "<li></li>"; }, 2).first()).to.equal('<li></li>');
+  // });
 
   it("can use a context", function() {
     var context = u('.demo li').nodes[0];

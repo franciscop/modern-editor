@@ -3,11 +3,12 @@
 describe(".on(event, fn)", function() {
 
   beforeEach(function(){
-    base.append('<div class="clickable"></div>');
+    base.append('<div class="clickable"><a>Hi</a></div>');
   });
 
   afterEach(function(){
     u('.clickable').remove();
+    base.off('click');
   });
 
   it("should be defined", function() {
@@ -35,6 +36,49 @@ describe(".on(event, fn)", function() {
     base.find('.clickable').trigger('submit');
   });
 
+  it("can do event delegation", function(done) {
+    base.on('click', '.clickable', function(e){
+      expect(e.target.className).to.equal('clickable');
+      done();
+    });
+    base.find('.clickable').trigger('click');
+    base.off('click');
+  });
+
+  it("event delegation has proper parameters", function(done) {
+    base.on('click', 'li', function(e){
+      expect(e.target.tagName).to.equal('A');
+
+      // This fails on circleci and local because phantomjs's webkit is too old
+      if (!mocha || !mocha.env) {
+        expect(e.currentTarget.tagName).to.equal('LI');
+      } else {
+        console.log("Test not run. currentTarget:", e.currentTarget.tagName);
+      }
+      expect(this.tagName).to.equal('LI');
+      done();
+    });
+    base.find('#world').trigger('click');
+    base.off('click');
+  });
+
+  it("event delegation not triggered by others", function() {
+    base.on('click', '.clickable', function(e){
+      throw new Error("Should never get here");
+    });
+    base.find('ul').not('.clickable').trigger('click');
+    base.off('click');
+  });
+
+  it("triggers the delegated event when child element is target", function(done) {
+    base.on('click', '.clickable', function(e) {
+      expect(e.target.tagName).to.equal('A');
+      expect(e.target.className).to.not.equal('clickable');
+      done();
+    });
+    base.find('.clickable a').trigger('click');
+  });
+
   it("triggers the event with custom data", function(done) {
     base.find('.clickable').on('click', function(e, a){
       same(!!e, true);
@@ -44,6 +88,15 @@ describe(".on(event, fn)", function() {
     });
     base.find('.clickable').trigger('click', 'a');
   });
+    it("triggers the delegated event with custom data", function(done) {
+      base.on('click', '.clickable', function(e, a){
+        same(!!e, true);
+        same(e.detail, ['a']);
+        same(a, 'a');
+        done();
+      });
+      base.find('.clickable').trigger('click', 'a');
+    });
 
   it("triggers the event with custom data object", function(done) {
     base.find('.clickable').on('click', function(e, a){
@@ -55,8 +108,29 @@ describe(".on(event, fn)", function() {
     base.find('.clickable').trigger('click', { a: 'b' });
   });
 
+  it("triggers the event with custom data object", function(done) {
+    base.on('click', '.clickable', function(e, a){
+      same(!!e, true);
+      same(e.detail, [{ a: 'b' }]);
+      same(a, { a: 'b' });
+      done();
+    });
+    base.find('.clickable').trigger('click', { a: 'b' });
+  });
+
   it("triggers the event with custom data values", function(done) {
     base.find('.clickable').on('click', function(e, a, b){
+      same(!!e, true);
+      same(e.detail, ['a', 'b']);
+      same(a, 'a');
+      same(b, 'b');
+      done();
+    });
+    base.find('.clickable').trigger('click', 'a', 'b');
+  });
+
+  it("triggers the event with custom data values", function(done) {
+    base.on('click', '.clickable', function(e, a, b){
       same(!!e, true);
       same(e.detail, ['a', 'b']);
       same(a, 'a');

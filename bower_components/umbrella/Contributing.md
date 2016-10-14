@@ -1,16 +1,27 @@
 # Contributing
 
-> Please use the branch "2" for changes/new features until this notice is removed
-
 Thanks for contributing! Developing Umbrella is quite easy:
 
-1. Clone the repository `git clone git+https://github.com/umbrellajs/umbrella.git && cd ./umbrellajs`
-1. Install the dependencies `npm install`
-1. Install grunt if you didn't have it
+> If you want to modify any of the ajax() methods, please read on the ajax section below
+
+1. Clone the repository  
+`git clone git://github.com/umbrellajs/umbrella.git && cd ./umbrella`
+1. Install Phantom JS 1.9.7. For Linux ([based on this](https://gist.github.com/julionc/7476620)):
+`npm run installphantom`
+1. Install the dependencies
+`npm install`
+1. [optional] Run the ajax testing server (explained below)
 1. Run `grunt watch`
 1. Modify any file within `/src` (code, tests or documentation)
 
-After these steps, the library, tests and documentation will be automatically joined. To see the tests open `/test/index.html` in your browser. Please try not to make a PR with broken tests.
+After these steps, the library, tests and documentation will be automatically built each time a change is saved. To see the tests open `/test/index.html` in your browser. Please try not to make a PR with broken tests.
+
+## Ajax testing
+
+To test properly the ajax methods a small Node.js server should be running. The file is written in `test/server.js` and can be run with `node test/server.js`, which should happen in a separated terminal. If you don't run it the tests will also pass since the ajax ones will not be tested (this is for CircleCI and the website to give a correct test status on Github, since we cannot run the server there).
+
+So before the step of *Run `grunt watch`* you should run `node test/server.js` in a different terminal. This is probably not needed if you are not modifying ajax() functions or ajax() related ones.
+
 
 ## New plugins
 
@@ -85,5 +96,3 @@ afterEach(function(){
   base.removeClass('bla blu');
 });
 ```
-
-When the variable `work` is set to false `var work = false;` in each function test, all of the inner tests should fail. This is so only the smallest part is correctly tested.

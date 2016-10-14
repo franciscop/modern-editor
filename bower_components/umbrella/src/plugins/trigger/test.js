@@ -6,7 +6,7 @@ describe(".trigger()", function() {
   });
 
   it("should be a function", function() {
-    expect(typeof base.trigger).to.equal('function');
+    isFn(base.trigger);
   });
 
   it("can trigger a click", function() {
@@ -14,6 +14,13 @@ describe(".trigger()", function() {
       expect(!!e).to.equal(true);
     });
     base.trigger('click');
+  });
+
+  it("can be concatenated", function() {
+    base.on('click', function(e){
+      expect(!!e).to.equal(true);
+    });
+    base.trigger('click').trigger('click');
   });
 
   it("can trigger an event in the wrong element", function() {

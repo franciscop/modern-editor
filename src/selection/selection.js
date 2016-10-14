@@ -1,6 +1,7 @@
 
 // SELECTION
 Editor.prototype.selection = function(){
+  var editor = this;
   this.selection.element = false;
   this.selection.text = "";
 
@@ -8,49 +9,45 @@ Editor.prototype.selection = function(){
   // Format nicely the code (if needed)
   this.on('refresh', function(){
 
-    var html = this.element.innerHTML;
-    if (!html || html.match(/^\s+$/) || html.match(/^<br\/?>$/)) {
-      this.command("insertParagraph");
-      var br = this.element.querySelector("br");
-      if (br && br.parentNode) {
-        br.parentNode.removeChild(br);
-      }
+    u(this).children('br').remove();
+    if (u(this).html().match(/^\s*$/)) {
+      editor.command("insertParagraph");
     }
   });
 
   // Display/hide the menu
   this.on('refresh', function(){
 
-    var prev = this.selection.text;
-    this.trigger('select:check');
-    var post = this.selection.text;
+    var prev = editor.selection.text;
+    editor.trigger('select:check');
+    var post = editor.selection.text;
 
     // If the selections has changed
     if (prev != post) {
-      this.trigger('select');
+      editor.trigger('select');
     }
   });
 
   this.on('select', function(){
-    this.selection.position = this.selection.range.getBoundingClientRect();
+    editor.selection.position = editor.selection.range.getBoundingClientRect();
   });
 
   // When the selection changes, check its value
   this.on('select', function(){
 
-    var selected = this.selection.text;
-    var hidden = this.menu.element.style.display !== 'block';
+    var selected = editor.selection.text;
+    var hidden = editor.menu.element.style.display !== 'block';
 
     if (selected && hidden) {
-      this.trigger('menu:show');
+      editor.trigger('menu:show');
     }
 
     if (selected) {
-      this.trigger('menu:move');
+      editor.trigger('menu:move');
     }
 
     if (!selected && !hidden) {
-      this.trigger('menu:hide');
+      editor.trigger('menu:hide');
     }
   });
 
@@ -60,20 +57,16 @@ Editor.prototype.selection = function(){
     var selection = window.getSelection();
 
     // Selected text
-    this.selection.text = selection.toString();
+    editor.selection.text = selection.toString();
 
 
     // Store the *right* element
     var node = selection.anchorNode;
-    if (!this.selection.text || !node) {
+    if (!editor.selection.text || !node) {
       return false;
     }
 
-    this.selection.element = node.nodeType == 1 ? node : node.parentElement;
-    this.selection.range = selection.getRangeAt(0);
-  });
-
-  this.on("click", function(e){
-    this.trigger('refresh', e);
+    editor.selection.element = node.nodeType == 1 ? node : node.parentElement;
+    editor.selection.range = selection.getRangeAt(0);
   });
 };

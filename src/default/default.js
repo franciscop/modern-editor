@@ -1,25 +1,31 @@
 
 Editor.prototype.default = function(){
+  var self = this;
 
   this.on('action:default:italic', function(){
-    this.command("italic");
+    self.command("italic");
   });
 
   this.on('action:default:bold', function(){
-    this.command("bold");
+    self.command("bold");
   });
 
   this.on('action:default:link', function(){
-    var link = u(this.selection.element).attr('href');
+    var link = u(self.selection.element).attr('href');
     var address = prompt("Link address", link || "");
-    this.command(address ? 'createLink' : 'unlink', address);
+    self.command(address ? 'createLink' : 'unlink', address);
   });
 
   this.on('action:default:code', function(){
-    this.tag("code");
+    self.tag("code");
   });
 
   this.on('action:default:info', function(){
     window.open("https://github.com/franciscop/modern-editor", "_blank");
+  });
+
+  // Setup the drag and drop listeners.
+  u(this.element).on('drop', function(e) {
+    editor.trigger('drop', editor, e.dataTransfer.files, e);
   });
 };

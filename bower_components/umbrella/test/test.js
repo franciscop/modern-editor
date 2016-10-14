@@ -4,6 +4,10 @@ var expect = chai.expect;
 // the tests for this function should fail
 var work = true;
 
+var wrap = function(cb){
+  cb();
+}
+
 // Check whether or not the element has a class
 // - cls: the classes that should be checked
 // - negate: whether or not the class should be present
@@ -125,6 +129,15 @@ describe("u()", function() {
     expect(u(inst).length).to.equal(1);
     expect(u(inst)).to.equal(inst);
   });
+
+  // it("accepts a function", function() {
+  //   expect(u(function(){}).first()).to.equal(false);
+  // });
+  //
+  // it("generates some html", function() {
+  //   expect(u(function(node, i){
+  //     return "<li></li>"; }, 2).first()).to.equal('<li></li>');
+  // });
 
   it("can use a context", function() {
     var context = u('.demo li').nodes[0];
@@ -479,31 +492,156 @@ describe(".append(html)", function() {
     expect(typeof base.append).to.equal('function');
   });
 
-  it("can add content in the right place", function() {
-    base.append('<a class="bla">Link</a>');
-    size('.base > .bla', 1);
+  it("can be called empty", function() {
+    base.append();
   });
 
-  it("can add content with a callback", function() {
-    base.append(callback);
-    size('.base > .bla', 1)('.base > .bla:last-child', 1);
+  it("can be called with empty string", function() {
+    base.append("");
   });
 
-  it("is called as many times as data in the second param", function() {
-    base.append('<a class="bla">Link</a>', ["a", "b"]);
-    size('.base > .bla', 2)('.base > .bla:last-child', 1);
+  it("a function looping data has right footprint", function() {
+    base.append(function(value, index, node, j){
+      if (['a', 'b'].indexOf(value) === -1) throw new Error("Not an element");
+      if (value === 'a') same(index, 0);
+      if (value === 'b') same(index, 1);
+      same(node, base.first());
+      same(j, 0)
+    }, ['a', 'b']);
   });
 
-  it("can add content with a callback and data", function() {
-    base.append(callback, ["a", "b"]);
-    size('.base > .bla', 2)('.base > .bla.a', 1)('.base > .bla.b', 1);
-    size('.bla.a + .bla.b', 1)('.bla.b + .bla.a', 0)('.base > .bla.b:last-child', 1);
+
+  it("a function looping a number has right footprint", function() {
+    var iterations = 0;
+    base.append(function(value, index, node, j){
+      if ([0, 1].indexOf(value) === -1) throw new Error("Not an element");
+      if (value === 0) same(index, 0);
+      if (value === 1) same(index, 1);
+      same(node, base.first());
+      same(j, 0);
+      iterations++;
+    }, 2);
+    same(iterations, 2);
   });
 
-  it("can append an html node", function() {
-    base.append(u('<div>').addClass('bla').first());
-    size('.bla', 1);
+
+
+  // HTML
+  describe("HTML string", function(){
+    it("can add a link", function() {
+      base.append('<a class="bla">Link</a>');
+      size('.base > .bla', 1);
+    });
+
+    it("can add sibling links", function() {
+      base.append('<a class="bla">Link</a><a class="bla">Link</a>');
+      size('.base > .bla', 2);
+    });
+
+    it("can add nested content", function() {
+      base.append('<strong class="bla"><a>Link</a></strong>');
+      size('.base > .bla > a', 1);
+    });
+
+    it("can append a table row", function() {
+      u('table.tbl').append('<tr><td>Hi</td></tr>');
+    });
+
+    it("can add just text", function() {
+      var frag = u('<div>').append('Hello world!\n');
+      same(frag.html(), 'Hello world!\n');
+    });
   });
+
+  describe("HTML string looped with array", function(){
+
+    it("insert two links", function() {
+      base.append('<a class="bla">Link</a>', ['a', 'b']);
+      size('.base > .bla', 2)('.base > .bla:last-child', 1);
+    });
+
+    it("can add nested content", function() {
+      base.append('<strong class="bla"><a>Link</a></strong>', ['a', 'b']);
+      size('.base > .bla > a', 2);
+    });
+
+    it("can append simple text", function() {
+      var frag = u('<div>').append('Hello!\n', ['a', 'b']);
+      same(frag.html(), 'Hello!\nHello!\n');
+    });
+  });
+
+
+
+  // Callback
+  describe("Callback", function(){
+    it("can add a link", function() {
+      base.append(function(){ return '<a class="bla">Link</a>'; });
+      size('.base > .bla', 1)('.base > .bla:last-child', 1);
+    });
+
+    it("can add sibling links", function() {
+      base.append(function(){ return '<a class="bla">Link</a><a class="bla">Link</a>'; });
+      size('.base > .bla', 2)('.base > .bla:last-child', 1);
+    });
+
+    it("can add nested content", function() {
+      base.append(function(){ return '<strong class="bla"><a>Link</a></strong>'; });
+      size('.base > .bla > a', 1);
+    });
+
+    it("can add just text", function() {
+      var frag = u('<div>').append(function(){ return 'Hello world!\n'; });
+      same(frag.html(), 'Hello world!\n');
+    });
+  });
+
+  describe("Callback looped with array", function(){
+
+    it("can add sibling links", function() {
+      base.append(function(v){ return '<a class="bla">Link</a>'; }, ['a', 'b']);
+      size('.base > .bla', 2)('.base > .bla:last-child', 1);
+    });
+
+    it("can add nested content", function() {
+      base.append(function(){ return '<strong class="bla"><a>Link</a></strong>'; }, ['a', 'b']);
+      size('.base > .bla > a', 2);
+    });
+
+    it("can add just text", function() {
+      var frag = u('<div>').append(function(){ return 'Hello world!\n'; }, ['a', 'b']);
+      same(frag.html(), 'Hello world!\nHello world!\n');
+    });
+
+    it("can add content with a callback and data", function() {
+      base.append(callback, ['a', 'b']);
+      size('.base > .bla', 2)('.base > .bla.a', 1)('.base > .bla.b', 1);
+      size('.bla.a + .bla.b', 1)('.bla.b + .bla.a', 0)('.base > .bla.b:last-child', 1);
+    });
+  });
+
+
+
+  describe("Umbrella instance", function(){
+    it("Accepts a simple one", function(){
+      base.append(u('<div class="bla"></div>'));
+      size('.base > .bla', 1)('.base > .bla:last-child', 1);
+    });
+
+    it("Keeps the events when appending", function(done){
+      base.append(u('<div class="bla">').on('click', function(){ done(); }));
+      size('.base > .bla', 1)('.base > .bla:last-child', 1);
+      u('.base .bla').trigger('click');
+    });
+
+    it("Clones multiple events when appending", function(done){
+      base.append(u('<div class="bla">').on('click touch', function(){ done(); }));
+      size('.base > .bla', 1)('.base > .bla:last-child', 1);
+      u('.base .bla').trigger('touch');
+    });
+  });
+
+
 
   it("can generate some text", function(){
     var list = u("<div>");
@@ -511,6 +649,35 @@ describe(".append(html)", function() {
 
     expect(list.children().length).to.equal(0);
     expect(list.html()).to.equal('a\nb\n');
+  });
+
+  it("can generate some text with number", function(){
+    var list = u("<div>");
+    if (work) list.append(function(n){ return n + "\n" }, 2);
+
+    expect(list.children().length).to.equal(0);
+    expect(list.html()).to.equal('0\n1\n');
+  });
+
+  it("isn't called any time with 0", function(){
+    u('<div>').append(function(n){ throw new Error("Shouldn't be called"); }, 0);
+  });
+
+
+
+  // Node
+  it("can append an html node", function() {
+    base.append(u('<div class="bla">').first());
+    size('.bla', 1);
+  });
+
+  it("should append supplied html to each targeted element and not only the last instance", function() {
+    base.append(u('<span class="test-span"></span><span class="test-span"></span><span class="test-span"></span><span class="test-span"></span>'));
+    base.append(u('<a class="append-me"></a>'));
+
+    u(".test-span").append(u(".append-me"));
+
+    size(".test-span .append-me", 4);
   });
 });
 
@@ -799,22 +966,166 @@ describe(".children(selector)", function() {
     expect(base.find('ul').children('.nonexist').length).to.equal(0);
   });
 });
+  // Testing the main file
+describe(".clone(options)", function() {
+  afterEach(function(){
+    u('.container').remove();
+  });
+
+  describe("clone() nodes without events", function() {
+    beforeEach(function() {
+      base.append('<div class="container">\
+        <div class="testClone1">Hello</div>\
+        <div class="cloneDestination">Goodbye</div>\
+      </div>');
+    });
+
+    it("should be a function", function() {
+      isFn(base.clone);
+    });
+
+    it("should clone a single simple node", function() {
+      u('.cloneDestination').append(u('.testClone1'));
+      size('.container > .testClone1', 1);
+      size('.cloneDestination > .testClone1', 1);
+      size('.testClone1', 2);
+      expect(u('.cloneDestination > .testClone1').text()).to.eq('Hello');
+    });
+
+    it("should clone nested nodes", function() {
+      u('.testClone1').append('<div class="testClone2">Hi</div>');
+
+      size('.container > .testClone1 > .testClone2', 1);
+      expect(u('.testClone2').text()).to.eq('Hi');
+    });
+  });
+
+
+
+  describe("clone() nodes with events", function() {
+    beforeEach(function() {
+      base.append('<div class="container">\
+        <div class="testClone1">Hello</div>\
+        <div class="testClone2">\
+          <div class="testCloneWithEvents1">\
+            click, touch, etc\
+          </div>\
+        </div>\
+        <div class="cloneDestination"></div>\
+      </div>');
+    });
+
+    it("should clone a node and its events by default", function(done) {
+      u('<div>').on('click', function(e){
+        u(e.target).off('click');
+        done();
+      }).clone().trigger('click').trigger('click');
+    });
+
+    it("should clone nested nodes and their events by default", function(done) {
+      u('.testCloneWithEvents1').on('click', function() { done(); });
+      u('.cloneDestination').append(u('.testClone2'));
+      u('.cloneDestination > .testClone2 > .testCloneWithEvents1').trigger('click');
+    });
+  });
+
+
+
+  describe("clone() form elements", function() {
+    before(function() {
+      u('form.clone [type=text]').first().value = 'test input';
+      u('form.clone [type=checkbox]').first().checked = true;
+      u('form.clone [type=radio]').first().checked = true;
+      u('form.clone select').first().value = 'b';
+      u('form.clone textarea').first().value = 'test textarea';
+    });
+
+    afterEach(function(){
+      u('.destination').html("");
+    });
+
+    it("has the correct values initially", function(){
+      expect(u('form.clone [type=text]').first().value).to.equal('test input', 'beforeClone');
+      expect(u('form.clone [type=checkbox]').first().checked).to.equal(true, 'beforeClone');
+      expect(u('form.clone [type=radio]').first().checked).to.equal(true, 'beforeClone');
+      expect(u('form.clone select').first().value).to.equal('b', 'beforeClone');
+      expect(u('form.clone textarea').first().value).to.equal('test textarea', 'beforeClone');
+    });
+
+
+    it ("clones a full form correctly", function(){
+      u('.destination').append(u('form.clone'));
+      expect(u('.destination [type=text]').length).to.equal(1);
+      expect(u('.destination [type=text]').first().value).to.equal('test input');
+      expect(u('.destination [type=checkbox]').first().checked).to.equal(true);
+      expect(u('.destination [type=radio]').first().checked).to.equal(true);
+      expect(u('.destination select').first().value).to.equal('b');
+      expect(u('.destination textarea').first().value).to.equal('test textarea');
+    });
+
+    it ("should clone a text input and its value by default", function() {
+      u('.destination').append(u('form.clone [type=text]'));
+      expect(u('.destination [type=text]').first().value).to.eq('test input');
+    });
+
+    it ("should clone a checkbox input and its value by default", function() {
+      u('.destination').append(u('form.clone [type=checkbox]'));
+      expect(u('.destination [type=checkbox]').first().checked).to.eq(true);
+    });
+
+    it ("should clone a radio input and its value by default", function() {
+      u('.destination').append(u('form.clone [type=radio]'));
+      expect(u('.destination [type=radio]').first().checked).to.eq(true);
+    });
+
+
+    it ("should clone a textarea input and its value by default", function() {
+      u('.destination').append(u('form.clone textarea'));
+      expect(u('.destination textarea').first().value).to.eq('test textarea');
+    });
+
+    it ("should clone a select input and its value by default", function() {
+      u('.destination').append(u('form.clone select'));
+      expect(u('.destination select').first().value).to.eq('b');
+    });
+  });
+
+
+
+
+  describe(".clone() and node data attributes", function() {
+    beforeEach(function() {
+      base.append('<div class="container"><div class="testCloneData" data-foo="bar"></div><div class="destination"></div></div>');
+    });
+
+    it("should clone node data attributes", function() {
+      u('.destination').append(u('.testCloneData'));
+      expect(u('.destination .testCloneData').data('foo')).to.eq('bar');
+    });
+  });
+});
+
 // Testing the main file
 describe(".closest(selector)", function() {
-  
+
   afterEach(function(){
     // A previous bug that would change the inner of the original reference
-    expect(base.nodes.length).to.equal(1);
+    expect(base.length).to.equal(1);
   });
-  
+
   it("should be a function", function() {
     expect(typeof base.closest).to.equal('function');
   });
-  
+
   it("can select the children of ul", function() {
-    expect(base.find('li').closest('ul').nodes.length).to.equal(1);
+    expect(base.find('li').closest('ul').length).to.equal(1);
+  });
+
+  it("is okay with no ancestors", function() {
+    expect(base.closest('.nonexist').length).to.equal(0);
   });
 });
+
 // Testing the main file
 describe(".data(name, value)", function() {
   it("should be a function", function() {
@@ -1139,27 +1450,28 @@ describe(".filter(selector)", function() {
 });
 // Testing the main file
 describe(".find(selector)", function() {
-  
+
   it("should be a function", function() {
     expect(typeof base.find).to.equal('function');
   });
-  
+
   it("can be empty and it selects all", function() {
-    expect(base.find().nodes.length).to.equal(base.find('*').nodes.length);
+    expect(base.find().length).to.equal(base.find('*').length);
   });
-  
+
   it("can select the list ul", function() {
-    expect(base.find('ul').nodes.length).to.equal(1);
+    expect(base.find('ul').length).to.equal(1);
   });
-  
+
   it("cannot select body", function() {
-    expect(base.find('body').nodes.length).to.equal(0);
+    expect(base.find('body').length).to.equal(0);
   });
-  
+
   it("doesn't select duplicates", function(){
-    expect(u("*").find('.brand a').nodes.length).to.equal(1);
+    expect(u("*").find('.brand a').length).to.equal(1);
   });
 });
+
 // Testing the main file
 describe(".first()", function() {
   
@@ -1175,6 +1487,132 @@ describe(".first()", function() {
     expect(base.find("li").first().nodeName).to.equal('LI');
   });
 });
+// Testing the main file
+describe("Function ajax(done, before)", function() {
+
+  // Generate the url (allow for testing locally)
+  function url(frag){
+    frag = frag || '';
+    var url = window.location.href;
+    if (!/^http/.test(window.location.href)) {
+      url = 'http://localhost:3000';
+    }
+
+    if (/tests(\/)?$/.test(url)) {
+      url = url.replace(/tests(\/)?/, '');
+    }
+    return url.replace(/\/$/, '') + '/' + frag.replace(/^\//, '');
+  }
+
+  function ifActive(cb){
+    return function(done){
+      ajax(url('/active'), {}, function(error, data){
+        if (!error && data === 'active') {
+          cb(done);
+        } else {
+          u('.noserver').html("Note: there is no server running, so AJAX methods are not being tested");
+          console.log("- Server not active");
+          done();
+        }
+      });
+    }
+  };
+
+  it("should be a function", function() {
+    isFn(ajax);
+  });
+
+  it("can make a simple get", ifActive(function(done) {
+    ajax(url('/plain'), {}, function(error, data, xhr){
+      expect(error).to.equal(null);
+      expect(data).to.equal('GET');
+      expect(xhr instanceof XMLHttpRequest).to.equal(true, 'XMLHttpRequest');
+      done();
+    }, function(xhr){
+      expect(xhr instanceof XMLHttpRequest).to.equal(true, 'XMLHttpRequest');
+    });
+  }));
+
+  it("can make a simple get", ifActive(function(done) {
+    ajax(url('/plain'), {}, function(error, data, xhr){
+      expect(data).to.equal('GET');
+      expect(xhr instanceof XMLHttpRequest).to.equal(true, 'XMLHttpRequest');
+      done();
+    });
+  }));
+
+  it("can send GET but data is lost", ifActive(function(done) {
+    var body = { send: '123' };
+    var options = { method: 'GET', body: body };
+    ajax(url('/json'), options, function(error, data){
+      expect(data.method).to.equal('GET');
+      expect(data.body).to.deep.equal({});
+      done();
+    });
+  }));
+
+  it("can send POST with data", ifActive(function(done) {
+    var body = { send: '123' };
+    var options = { method: 'POST', body: body };
+    ajax(url('/json'), options, function(error, data){
+      expect(data.method).to.equal('POST');
+      expect(data.body).to.deep.equal(body);
+      done();
+    });
+  }));
+
+  it("can send PUT with data", ifActive(function(done) {
+    var body = { send: '123' };
+    var options = { method: 'PUT', body: body };
+    ajax(url('/json'), options, function(error, data){
+      expect(data.method).to.equal('PUT');
+      expect(data.body).to.deep.equal(body);
+      done();
+    });
+  }));
+
+  it("can send DELETE", ifActive(function(done) {
+    var options = { method: 'DELETE' };
+    ajax(url('/json'), options, function(error, data){
+      expect(data.method).to.equal('DELETE');
+      if (!window.mochaPhantomJS) {
+        expect(data.body).to.deep.equal({}, "Body should be ignored");
+      }
+      done();
+    });
+  }));
+});
+
+describe("fn ajax()", function() {
+  beforeEach(function() {
+    this.xhr = sinon.useFakeXMLHttpRequest();
+    this.requests = [];
+    this.xhr.onCreate = function(xhr) {
+      this.requests.push(xhr);
+    }.bind(this);
+  });
+
+  afterEach(function() {
+    this.xhr.restore();
+  })
+
+  it("should be a function", function() {
+    expect(typeof ajax).to.equal('function');
+  });
+
+  it("should parameterize objects", function() {
+    var body = {hello: 'world'};
+    ajax('#', {body: body, method: 'POST'});
+    expect(this.requests[0].requestBody).to.equal('hello=world');
+  });
+
+  it("should not parameterize FormData", function() {
+    var body = new FormData();
+    ajax('#', {body: body, method: 'POST'});
+    expect(typeof this.requests[0].requestBody).to.equal('object');
+  });
+});
+
 // Testing the main file
 describe("parseJsom(string)", function() {
   
@@ -1194,6 +1632,132 @@ describe("parseJsom(string)", function() {
     expect(parseJson('{"hello": "world"}').hello).to.equal('world');
   });
 });
+// Note: node._e['submit'] and other events will appear as [null] in PhantomJS
+// but they work as expected
+describe(".handle(event, fn)", function() {
+
+  beforeEach(function(){
+    base.append('<div class="clickable"><a>Hi</a></div>');
+  });
+
+  afterEach(function(){
+    u('.clickable').remove();
+    base.off('click');
+  });
+
+  it("should be defined", function() {
+    expect(typeof base.handle).to.equal('function');
+  });
+
+  it("triggers the event", function(done) {
+    base.find('.clickable').handle('click', function(e){
+      expect(e.target).to.equal(this);
+      done();
+    });
+    base.find('.clickable').trigger('click');
+  });
+
+  it("triggers the event twice", function(done) {
+    var i = 1;
+    base.find('.clickable').handle('click submit', function(e){
+      expect(e.target).to.equal(this);
+      i++;
+      if (i === 3) {
+        done();
+      }
+    });
+    base.find('.clickable').trigger('click');
+    base.find('.clickable').trigger('submit');
+  });
+
+  it("can do event delegation", function(done) {
+    base.handle('click', '.clickable', function(e){
+      expect(e.target.className).to.equal('clickable');
+      done();
+    });
+    base.find('.clickable').trigger('click');
+    base.off('click');
+  });
+
+  it("event delegation not triggered by others", function() {
+    base.handle('click', '.clickable', function(e){
+      throw new Error("Should never get here");
+    });
+    base.find('ul').not('.clickable').trigger('click');
+    base.off('click');
+  });
+
+  it("triggers the delegated event when child element is target", function(done) {
+    base.handle('click', '.clickable', function(e) {
+      expect(e.target.tagName).to.equal('A');
+      expect(e.target.className).to.not.equal('clickable');
+      done();
+    });
+    base.find('.clickable a').trigger('click');
+  });
+
+  it("triggers the event with custom data", function(done) {
+    base.find('.clickable').handle('click', function(e, a){
+      same(!!e, true);
+      same(e.detail, ['a']);
+      same(a, 'a');
+      done();
+    });
+    base.find('.clickable').trigger('click', 'a');
+  });
+    it("triggers the delegated event with custom data", function(done) {
+      base.handle('click', '.clickable', function(e, a){
+        same(!!e, true);
+        same(e.detail, ['a']);
+        same(a, 'a');
+        done();
+      });
+      base.find('.clickable').trigger('click', 'a');
+    });
+
+  it("triggers the event with custom data object", function(done) {
+    base.find('.clickable').handle('click', function(e, a){
+      same(!!e, true);
+      same(e.detail, [{ a: 'b' }]);
+      same(a, { a: 'b' });
+      done();
+    });
+    base.find('.clickable').trigger('click', { a: 'b' });
+  });
+
+  it("triggers the event with custom data object", function(done) {
+    base.handle('click', '.clickable', function(e, a){
+      same(!!e, true);
+      same(e.detail, [{ a: 'b' }]);
+      same(a, { a: 'b' });
+      done();
+    });
+    base.find('.clickable').trigger('click', { a: 'b' });
+  });
+
+  it("triggers the event with custom data values", function(done) {
+    base.find('.clickable').handle('click', function(e, a, b){
+      same(!!e, true);
+      same(e.detail, ['a', 'b']);
+      same(a, 'a');
+      same(b, 'b');
+      done();
+    });
+    base.find('.clickable').trigger('click', 'a', 'b');
+  });
+
+  it("triggers the event with custom data values", function(done) {
+    base.handle('click', '.clickable', function(e, a, b){
+      same(!!e, true);
+      same(e.detail, ['a', 'b']);
+      same(a, 'a');
+      same(b, 'b');
+      done();
+    });
+    base.find('.clickable').trigger('click', 'a', 'b');
+  });
+});
+
 // Testing the main file
 describe(".hasClass(name)", function() {
   
@@ -1273,73 +1837,6 @@ describe(".is(selector)", function() {
   });
 });
 
-describe(".join(function(){})", function() {
-
-  it("should be defined", function() {
-    expect(typeof base.join).to.equal('function');
-  });
-
-  it("empty gives an error", function(){
-    same(u([0, 1, 2]).join(), u([0, 1, 2]));
-  });
-
-  it("can loop as each()", function() {
-    u([0, 1, 2, 3]).join(function(node, i){
-      expect(node).to.equal(i);
-    });
-
-    u([3, 4, 5, 6]).join(function(node, i){
-      expect(node).to.equal(i + 3);
-    });
-  });
-
-  it("can loop a real element", function() {
-    base.join(function(node, i){
-      expect(u(node).hasClass('base')).to.equal(true);
-      expect(i).to.equal(0);
-    });
-  });
-
-  it("can remove an element", function() {
-    var final = u([1, 2, 3, 4]).join(function(node, i){
-      return i === 0 ? false : node;
-    });
-    expect(final.length).to.equal(3);
-  });
-
-  it("can remove several elements", function() {
-    var final = u([1, 2, 3, 4]).join(function(node, i){
-      return i < 3 ? false : node;
-    });
-    expect(final.length).to.equal(1);
-  });
-
-  it("can add an element", function() {
-    var final = u([1, 2, 3, 4]).join(function(node, i){
-      return i === 0 ? [node, 'a'] : node;
-    });
-    expect(final.length).to.equal(5);
-  });
-
-  it("can add an many elements", function() {
-    var final = u([1, 2, 3, 4]).join(function(node, i){
-      return [node + 'a', node + 'b', node + 'c'];
-    });
-    expect(final.length).to.equal(12);
-  });
-
-  it("has the right this", function(){
-    u(['a', 'b']).join(function(node, i){
-      expect(this instanceof u).to.equal(true);
-    });
-  });
-
-  it("returns an umbrella object", function(){
-    var ret = u(['a', 'b']).join(function(){});
-    expect(ret instanceof u).to.equal(true);
-  });
-});
-
 // Testing the main file
 describe(".last()", function() {
 
@@ -1366,6 +1863,132 @@ describe(".last()", function() {
 
 });
 
+var list = u('<ul>').append(function(i){ return '<li>'+i+'</li>'; }, 10).find('li');
+
+describe(".map(function(){})", function() {
+
+  it("should be defined", function() {
+    expect(typeof base.map).to.equal('function');
+  });
+
+  it("empty gives an error", function(){
+    same(u([0, 1, 2]).map(), u([0, 1, 2]));
+  });
+
+  it("can loop as each()", function() {
+    u([0, 1, 2, 3]).map(function(node, i){
+      expect(node).to.equal(i);
+    });
+
+    u([3, 4, 5, 6]).map(function(node, i){
+      expect(node).to.equal(i + 3);
+    });
+  });
+
+  it("can loop a real element", function() {
+    base.map(function(node, i){
+      expect(u(node).hasClass('base')).to.equal(true);
+      expect(i).to.equal(0);
+    });
+  });
+
+  it("accepts return of single element", function(){
+    var els = list.map(function(node){
+      return node;
+    }).each(function(node, i){
+      expect(i).to.equal(parseInt(node.innerHTML));
+    });
+  });
+
+  it("accepts return of string and parses it", function(){
+    list.map(function(node){
+      return '<li>' + node.innerHTML + '</li>';
+    }).each(function(node, i){
+      expect(i).to.equal(parseInt(node.innerHTML));
+    });
+  });
+
+  it("accepts return of two elements string", function(){
+    list.map(function(node, i){
+      return '<span>' + (i * 2) + '</span>' +
+        '<span>' + (i * 2 + 1) + '</span>';
+    }).each(function(node, i){
+      expect(i).to.equal(parseInt(node.innerHTML));
+    });
+  });
+
+  it("accepts return of array of elements", function(){
+    var els = list.map(function(node, i){
+      return [node];
+    }).each(function(node, i){
+      expect(i).to.equal(parseInt(node.innerHTML));
+    });
+  });
+
+  it("accepts return of array of two elements", function(){
+    same(list.map(function(node, i){
+      var newNode = u('<li>').html('a').first();
+      return [node, newNode];
+    }).length, 20);
+  });
+
+  it("accepts return of umbrella instance", function(){
+    var els = list.map(function(node, i){
+      return u(node);
+    }).each(function(node, i){
+      expect(i).to.equal(parseInt(node.innerHTML));
+    });
+  });
+
+  it("falsy removes them", function(){
+    expect(list.map(function(){ return false; }).length).to.equal(0);
+    expect(list.map(function(){ return null; }).length).to.equal(0);
+    expect(list.map(function(){ return undefined; }).length).to.equal(0);
+    expect(list.map(function(){ return ''; }).length).to.equal(0);
+    expect(list.map(function(){ return 0; }).length).to.equal(0);
+    expect(list.map(function(){}).length).to.equal(0);
+  });
+
+  it("can remove a single element", function() {
+    var final = u([1, 2, 3, 4]).map(function(node, i){
+      return i === 0 ? false : node;
+    });
+    expect(final.length).to.equal(3);
+  });
+
+  it("can remove several elements", function() {
+    var final = u([1, 2, 3, 4]).map(function(node, i){
+      return i < 3 ? false : node;
+    });
+    expect(final.length).to.equal(1);
+  });
+
+  it("can add an element", function() {
+    var final = u([1, 2, 3, 4]).map(function(node, i){
+      return i === 0 ? [node, 'a'] : node;
+    });
+    expect(final.length).to.equal(5);
+  });
+
+  it("can add an many elements", function() {
+    var final = u([1, 2, 3, 4]).map(function(node, i){
+      return [node + 'a', node + 'b', node + 'c'];
+    });
+    expect(final.length).to.equal(12);
+  });
+
+  it("has the right this", function(){
+    u(['a', 'b']).map(function(node, i){
+      expect(this instanceof u).to.equal(true);
+    });
+  });
+
+  it("returns an umbrella object", function(){
+    var ret = u(['a', 'b']).map(function(){});
+    expect(ret instanceof u).to.equal(true);
+  });
+});
+
 describe(".not(elems)", function() {
 
   beforeEach(function() {
@@ -1376,15 +1999,15 @@ describe(".not(elems)", function() {
         <li></li> \
       </ul>');
 
-    expect(u('.not-test').nodes.length).to.equal(1);
-    expect(u('.not-test li').nodes.length).to.equal(3);
+    expect(u('.not-test').length).to.equal(1);
+    expect(u('.not-test li').length).to.equal(3);
   });
 
   afterEach(function() {
     u('.not-test').remove();
-    expect(u('.not-test').nodes.length).to.equal(0);
+    expect(u('.not-test').length).to.equal(0);
   });
-  
+
   it("should be a function", function() {
     expect(typeof base.not).to.equal('function');
   });
@@ -1398,26 +2021,27 @@ describe(".not(elems)", function() {
   });
 
   it("returns same if called empty", function() {
-    expect(base.find('.not-test li').not().nodes.length).to.equal(base.find('.not-test li').nodes.length);
-    expect(base.find('.not-test li').not('').nodes.length).to.equal(base.find('.not-test li').nodes.length);
-    expect(base.find('.not-test li').not(null).nodes.length).to.equal(base.find('.not-test li').nodes.length);
-    expect(base.find('.not-test li').not(undefined).nodes.length).to.equal(base.find('.not-test li').nodes.length);
-    expect(base.find('.not-test li').not(false).nodes.length).to.equal(base.find('.not-test li').nodes.length);
+    expect(base.find('.not-test li').not().length).to.equal(base.find('.not-test li').length);
+    expect(base.find('.not-test li').not('').length).to.equal(base.find('.not-test li').length);
+    expect(base.find('.not-test li').not(null).length).to.equal(base.find('.not-test li').length);
+    expect(base.find('.not-test li').not(undefined).length).to.equal(base.find('.not-test li').length);
+    expect(base.find('.not-test li').not(false).length).to.equal(base.find('.not-test li').length);
   });
 
   it("filter single element", function() {
-    expect(base.find('.not-test li').not(u(u('.not-test li').first())).nodes.length).to.equal(2);
+    expect(base.find('.not-test li').not(u(u('.not-test li').first())).length).to.equal(2);
   });
 
   it("filter multiple elements", function() {
-    expect(base.find('.not-test li').not(u('.not-test li.filter')).nodes.length).to.equal(1);
+    expect(base.find('.not-test li').not(u('.not-test li.filter')).length).to.equal(1);
   });
 
   it("filter selector elements", function() {
-    expect(base.find('.not-test li').not('.filter').nodes.length).to.equal(1);
+    expect(base.find('.not-test li').not('.filter').length).to.equal(1);
   });
 
 });
+
 describe('.off()', function() {
 
   var listener = function() {
@@ -1486,11 +2110,12 @@ describe('.off()', function() {
 describe(".on(event, fn)", function() {
 
   beforeEach(function(){
-    base.append('<div class="clickable"></div>');
+    base.append('<div class="clickable"><a>Hi</a></div>');
   });
 
   afterEach(function(){
     u('.clickable').remove();
+    base.off('click');
   });
 
   it("should be defined", function() {
@@ -1518,6 +2143,49 @@ describe(".on(event, fn)", function() {
     base.find('.clickable').trigger('submit');
   });
 
+  it("can do event delegation", function(done) {
+    base.on('click', '.clickable', function(e){
+      expect(e.target.className).to.equal('clickable');
+      done();
+    });
+    base.find('.clickable').trigger('click');
+    base.off('click');
+  });
+
+  it("event delegation has proper parameters", function(done) {
+    base.on('click', 'li', function(e){
+      expect(e.target.tagName).to.equal('A');
+
+      // This fails on circleci and local because phantomjs's webkit is too old
+      if (!mocha || !mocha.env) {
+        expect(e.currentTarget.tagName).to.equal('LI');
+      } else {
+        console.log("Test not run. currentTarget:", e.currentTarget.tagName);
+      }
+      expect(this.tagName).to.equal('LI');
+      done();
+    });
+    base.find('#world').trigger('click');
+    base.off('click');
+  });
+
+  it("event delegation not triggered by others", function() {
+    base.on('click', '.clickable', function(e){
+      throw new Error("Should never get here");
+    });
+    base.find('ul').not('.clickable').trigger('click');
+    base.off('click');
+  });
+
+  it("triggers the delegated event when child element is target", function(done) {
+    base.on('click', '.clickable', function(e) {
+      expect(e.target.tagName).to.equal('A');
+      expect(e.target.className).to.not.equal('clickable');
+      done();
+    });
+    base.find('.clickable a').trigger('click');
+  });
+
   it("triggers the event with custom data", function(done) {
     base.find('.clickable').on('click', function(e, a){
       same(!!e, true);
@@ -1527,6 +2195,15 @@ describe(".on(event, fn)", function() {
     });
     base.find('.clickable').trigger('click', 'a');
   });
+    it("triggers the delegated event with custom data", function(done) {
+      base.on('click', '.clickable', function(e, a){
+        same(!!e, true);
+        same(e.detail, ['a']);
+        same(a, 'a');
+        done();
+      });
+      base.find('.clickable').trigger('click', 'a');
+    });
 
   it("triggers the event with custom data object", function(done) {
     base.find('.clickable').on('click', function(e, a){
@@ -1538,8 +2215,29 @@ describe(".on(event, fn)", function() {
     base.find('.clickable').trigger('click', { a: 'b' });
   });
 
+  it("triggers the event with custom data object", function(done) {
+    base.on('click', '.clickable', function(e, a){
+      same(!!e, true);
+      same(e.detail, [{ a: 'b' }]);
+      same(a, { a: 'b' });
+      done();
+    });
+    base.find('.clickable').trigger('click', { a: 'b' });
+  });
+
   it("triggers the event with custom data values", function(done) {
     base.find('.clickable').on('click', function(e, a, b){
+      same(!!e, true);
+      same(e.detail, ['a', 'b']);
+      same(a, 'a');
+      same(b, 'b');
+      done();
+    });
+    base.find('.clickable').trigger('click', 'a', 'b');
+  });
+
+  it("triggers the event with custom data values", function(done) {
+    base.on('click', '.clickable', function(e, a, b){
       same(!!e, true);
       same(e.detail, ['a', 'b']);
       same(a, 'a');
@@ -1753,6 +2451,84 @@ describe(".removeClass()", function() {
   });
 });
 
+// Based on
+if(u(document.createDocumentFragment()).append('<div>').children().length == 0) {
+  Object.defineProperty(DocumentFragment.prototype, "children", {"get" : function() {
+    var arr = [],
+      child = this.firstChild;
+
+    while (child) {
+      if (child.nodeType == 1) arr.push(child);
+      child = child.nextSibling;
+    }
+
+    return arr;
+  }});
+};
+
+
+// Testing the replace plugin main file
+describe(".replace(newValue)", function() {
+
+  afterEach(function(){
+    base.find('button.update').remove();
+  });
+
+  it("should be a function", function() {
+    expect(typeof base.replace).to.equal('function');
+  });
+
+  it("replace the single node string case", function() {
+    base.append('<a class="save">Save</a>');
+
+    base.find('a.save').replace('<button class="update">Update</button>');
+    size('.base > button.update', 1);
+
+    base.find('button.update').remove();
+  });
+
+  it("returns the correct values", function(){
+    base.append('<a class="save">Save</a>');
+    var button = base.find('a.save').replace('<button class="update">Update</button>').first();
+    expect(button.nodeName).to.equal('BUTTON');
+    expect(u(button).closest('body').length).to.equal(1);
+
+
+    base.find('button.update').remove();
+  });
+
+  it("replace multi nodes string case", function() {
+    base.append('<a class="save">Save</a><a class="save">Save</a>');
+
+    base.find('a.save').replace('<button class="update">Update</button>');
+    size('.base > button.update', 2);
+
+    base.find('button.update').remove();
+  });
+
+  it("replace the single node function case", function() {
+    base.append('<a class="save">Save</a>');
+
+    base.find('a.save').replace(function(link){
+      return '<button class="update">' + link.innerHTML  + '</button>';
+    });
+    size('.base > button.update', 1);
+
+    base.find('button.update').remove();
+  });
+
+  it("replace multi nodes function case", function() {
+    base.append('<a class="save">Save</a><a class="save">Save</a>');
+
+    base.find('a.save').replace(function(link){
+      return '<button class="update">' + link.innerHTML  + '</button>';
+    });
+    size('.base > button.update', 2);
+
+    base.find('button.update').remove();
+  });
+});
+
 // insert tall element to test scroll()
 var elHeight = window.innerHeight + 100;
 var el = '<div style="height:' + elHeight + 'px" id="scrollTest"></div>';
@@ -1807,6 +2583,7 @@ describe(".select(selector)", function() {
 
   it("can select by id", function(){
     expect(u().select('#base')).to.not.equal(null);
+    expect(u().select('#base').nodeName).to.equal('DIV');
   });
 
   it("can select by complex selector", function() {
@@ -2125,7 +2902,7 @@ describe(".trigger()", function() {
   });
 
   it("should be a function", function() {
-    expect(typeof base.trigger).to.equal('function');
+    isFn(base.trigger);
   });
 
   it("can trigger a click", function() {
@@ -2133,6 +2910,13 @@ describe(".trigger()", function() {
       expect(!!e).to.equal(true);
     });
     base.trigger('click');
+  });
+
+  it("can be concatenated", function() {
+    base.on('click', function(e){
+      expect(!!e).to.equal(true);
+    });
+    base.trigger('click').trigger('click');
   });
 
   it("can trigger an event in the wrong element", function() {
@@ -2165,5 +2949,71 @@ describe(".trigger()", function() {
       done();
     });
     base.trigger('click', 'good');
+  });
+});
+
+// Testing the main file
+describe(".wrap()", function() {
+  beforeEach(function(){
+    base.append('<button class="example">Link1</button>');
+    size('.base > .example', 1);
+  });
+
+  afterEach(function(){
+    u('.example, .example-wrapper').remove();
+  });
+
+  it("should be a function", function() {
+    expect(typeof base.wrap).to.equal('function');
+  });
+
+  it("should correctly wrap a single element using a chained umbrella.js function", function() {
+    u('.example').wrap('<a>').attr({ href: 'http://google.com/', class: 'example-wrapper' });
+    size('.example-wrapper > .example', 1);
+  });
+
+  it("should correctly wrap a single formatted selector", function() {
+    u('.example').wrap('<a href="http://google.com/" class="example-wrapper">');
+    size('.example-wrapper > .example', 1);
+  });
+
+  it("should wrap multiple elements using a chained umbrella.js function", function() {
+    base.append('<button class="example">Link1</button>');
+
+    u('.example').wrap('<a>').addClass('example-wrapper');
+    size('.example-wrapper .example', 2);
+  });
+
+  it("when wrapping  multiple elements it should return a copy of the original node", function() {
+    base.append('<button class="example">Link2</button>');
+
+    var wrappedNodes = u('.example').wrap('<a>').addClass('example-wrapper');
+    expect(wrappedNodes.nodes[0].innerText).to.equal('Link1')
+    expect(wrappedNodes.nodes[1].innerText).to.equal('Link2')
+  });
+
+  it("should add all specified attributes to the wrapper element using a chained umbrella js function", function() {
+    u('.example').wrap('<a>').attr({ href: 'http://google.com/', class: 'example-wrapper' });
+    expect(u('.example-wrapper').attr('href')).to.equal('http://google.com/');
+  });
+
+  it("should add all specified attributes to the wrapper element using a formatted selector", function() {
+    u('.example').wrap('<a href="http://google.com/" class="example-wrapper">');
+    expect(u('.example-wrapper').attr('href')).to.equal('http://google.com/');
+  });
+
+  it("should support nested selector arguments", function() {
+    u('.example').wrap('<div id="one"><div id="two"></div></div>');
+    size('#one #two .example', 1);
+  });
+
+  it("should support nested selector arguments with more than one nested child", function() {
+    u('.example').wrap('<div id="a1"><div id="b1"><div id="c1"></div></div><div id="b2"><div id="c2"><div id="d1"></div></div></div></div>');
+    size('#a1 #b1 #c1 .example', 1);
+  });
+
+  it("should only append to the last child of the nested selector argument's first child", function() {
+    u('.example').wrap('<div id="a1"><div id="b1"><div id="c1"></div></div><div id="b2"><div id="c2"><div id="d1"></div></div></div></div>');
+    size('#a2 #b2 #c2 #d1 .example', 0);
   });
 });
