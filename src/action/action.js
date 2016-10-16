@@ -27,7 +27,7 @@ Editor.prototype.add = function(name, options){
       }
     }
   } else {
-    var realaction = options.action;
+    var realaction = options.action.bind(editor, editor);
   }
 
   // Call the init action inmediately

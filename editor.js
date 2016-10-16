@@ -1902,12 +1902,9 @@ var Editor = function(selector, options){
   }
 
   this.model = this.parse(this.element.innerHTML);
-  this.content = this.build();
 
-  this.history = {
-    entries: [this.model]
-  };
-
+  this.history(this);
+  this.history.register(this.model);
 
   // Editor options
   options = options || {};
@@ -1938,6 +1935,11 @@ var Editor = function(selector, options){
   document.addEventListener("click", function(e){ editor.trigger('refresh', e); });
 
   this.trigger('init');
+
+  var editor = this;
+  this.on('refresh', function(){
+    editor.history.register();
+  });
 };
 
 
@@ -1972,7 +1974,8 @@ u.prototype.editor = function(options){
 };
 
 
-Editor.prototype.virtual = {};
+Editor.prototype.virtual = function(){ this.virtual.editor = this; };
+Editor.prototype.history = function(self){ this.history.editor = self; };
 
 // Register a new full action
 Editor.prototype.add = function(name, options){
@@ -2003,7 +2006,7 @@ Editor.prototype.add = function(name, options){
       }
     }
   } else {
-    var realaction = options.action;
+    var realaction = options.action.bind(editor, editor);
   }
 
   // Call the init action inmediately
@@ -2135,6 +2138,7 @@ u.prototype.content = function(){
   var children = tag => [].slice.call(tag.childNodes).reduce((tags, node, i, all) => {
     // It's not an element
     if (node.nodeType !== 1) return tags;
+    if (node.nodeName === 'BR') return tags;
 
     var before = all.slice(0, i).map(one => one.textContent).join('');
 
@@ -2194,18 +2198,20 @@ u.prototype.content = function(){
 
 
   // Build each of the parts and put them together
-  proto.build = function(model){
-    return this.model.map(part => Object.assign(part, {
+  proto.build = function(){
+    return JSON.parse(JSON.stringify(this.model)).map(part => Object.assign(part, {
       tags: proto.deduplicate(part.tags)
     })).map(virtual.build).join('');
   }
 
   proto.parse = function(html){
-    return u('<article>').html(cleanBlock(html)).children().nodes.map(node => ({
-      type: node.nodeName.toLowerCase(),
-      text: cleanBlock(node.textContent),
-      tags: children(node)
-    }));
+    return JSON.parse(JSON.stringify(
+      u('<article>').html(cleanBlock(html)).children().nodes.map(node => ({
+        type: node.nodeName.toLowerCase(),
+        text: cleanBlock(node.textContent),
+        tags: children(node)
+      }))
+    ));
   }
 
 })(Editor.prototype, Editor.prototype.virtual);
@@ -2262,6 +2268,65 @@ Editor.prototype.trigger = function(name){
   el.trigger.apply(el, ['editor:' + name + ':after'].concat(data));
 };
 
+// History, handle changes in the DOM
+(function(history){
+
+  var hash = str => str.split('').reduce((prevHash, currVal) =>
+    ((prevHash << 5) - prevHash) + currVal.charCodeAt(0)
+  , 0);
+
+  history.entries = history.entries || [];
+  history.undone = history.undone || [];
+
+  // entry = { date: Date, model: {}, type: ''||false }
+  history.register = function(type, date){
+    var cursor = this.editor.selection.cursor(this.editor);
+    var html = this.editor.element.innerHTML;
+    var built = hash(html);
+    var last = history.entries[history.entries.length - 1];
+    // if (last && (cursor.index !== last.cursor.index || cursor.offset !== last.cursor.offset)) {
+    //   history.entries[history.entries.length - 1].cursor = cursor;
+    // }
+    if (last && last.hash === built) return;
+    var model = this.editor.parse(html);
+    history.entries.push({
+      model: model,
+      type: type || 'none',
+      date: date || new Date(),
+      hash: built,
+      cursor: cursor
+    });
+    this.editor.model = model;
+    history.undone = [];
+  };
+
+  history.undo = function () {
+    if (history.entries.length > 1) {
+      var undone = history.entries.pop();
+      var entry = history.entries.pop();
+      this.editor.model = entry.model;
+      this.editor.element.innerHTML = this.editor.build(this.editor.model);
+      this.editor.selection.setCursor(entry.cursor);
+      history.undone.push(undone);
+      var undone = history.undone;
+      history.register();
+      history.undone = undone;
+      //this.editor.selection.restore(history.entries[history.entries.length - 1].cursor);
+    }
+  }
+
+  history.redo = function () {
+    if (history.undone.length) {
+      var entry = history.undone.pop();
+      history.entries.push(entry);
+      this.editor.model = entry.model;
+      this.editor.element.innerHTML = this.editor.build(this.editor.model);
+      this.editor.selection.setCursor(entry.cursor);
+      //this.editor.selection.restore(history.entries[history.entries.length - 1].cursor);
+    }
+  }
+})(Editor.prototype.history);
+
 // Menu
 
 Editor.prototype.menu = function(name){
@@ -2315,6 +2380,9 @@ function generate(element, editor){
   return('<a href="test">Hi there</a>');
 }
 
+Editor.prototype.menu.test = function(num){
+  this.editor.b = num;
+}
 
 // Add an element to the menu
 Editor.prototype.menu.add = function(element, options){
@@ -2535,6 +2603,59 @@ Editor.prototype.selection.restore = function () {
   selection.addRange(range);
 }
 
+Editor.prototype.selection.cursor = function(editor){
+  var selected = window.getSelection();
+  var anchor = selected.anchorNode;
+  while (anchor && anchor.nodeType !== 1) {
+    anchor = anchor.parentNode;
+  }
+  return {
+    index: u(editor.element).children().nodes.indexOf(anchor),
+    offset: selected.anchorOffset
+  };
+}
+
+Editor.prototype.selection.setCursor = function(saved){
+  this.editor.element.focus();
+  range = document.createRange();
+  var div = u(this.editor.element).children().nodes[saved.index];
+  if (!div) return;
+  var child = div.childNodes[0];
+  if (!child) return;
+  range.setStart(child, saved.offset);
+  range.setEnd(child, saved.offset);
+  var selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+
+
+
+
+//   this.editor.element.focus();
+//   var sel = window.getSelection();
+//   var range = sel.getRangeAt(0);
+//   var sC=this.editor.element;
+//   var eC=this.editor.element;
+//
+//   var C = rp.sC;
+//   var x = C.length;
+//   while(x--) {
+//     sC = sC.childNodes[C[x]];
+//   }
+//   var C = rp.eC;
+//   var x = C.length;
+//   while(x--) {
+//     eC=eC.childNodes[C[x]];
+//   }
+//
+//   range.setStart(sC,rp.sO);
+//   range.setEnd(eC,rp.eO);
+//   sel.removeAllRanges();
+//   sel.addRange(range)
+// }
+
 
 // SHORTCUTS
 Editor.prototype.shortcuts = function(){
@@ -2556,7 +2677,8 @@ Editor.prototype.shortcuts = function(){
     editor.trigger('action:' + data, e);
   });
 
-  u(this.element).on("key", function(e){
+  u(this.element).on("keyup", function(e){
+    editor.history.register();
     editor.trigger('refresh');
   });
 };
@@ -2627,7 +2749,7 @@ Editor.prototype.tag = function(name, attr){
       : '',
     open: data => `<${data.type}${tags.attrs(data.attributes)}>`,
     close: data => `</${data.type}>`
-  }
+  };
 
   var desc = (a, b) => b.position - a.position;
 

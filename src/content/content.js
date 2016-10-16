@@ -27,6 +27,7 @@
   var children = tag => [].slice.call(tag.childNodes).reduce((tags, node, i, all) => {
     // It's not an element
     if (node.nodeType !== 1) return tags;
+    if (node.nodeName === 'BR') return tags;
 
     var before = all.slice(0, i).map(one => one.textContent).join('');
 
@@ -86,18 +87,20 @@
 
 
   // Build each of the parts and put them together
-  proto.build = function(model){
-    return this.model.map(part => Object.assign(part, {
+  proto.build = function(){
+    return JSON.parse(JSON.stringify(this.model)).map(part => Object.assign(part, {
       tags: proto.deduplicate(part.tags)
     })).map(virtual.build).join('');
   }
 
   proto.parse = function(html){
-    return u('<article>').html(cleanBlock(html)).children().nodes.map(node => ({
-      type: node.nodeName.toLowerCase(),
-      text: cleanBlock(node.textContent),
-      tags: children(node)
-    }));
+    return JSON.parse(JSON.stringify(
+      u('<article>').html(cleanBlock(html)).children().nodes.map(node => ({
+        type: node.nodeName.toLowerCase(),
+        text: cleanBlock(node.textContent),
+        tags: children(node)
+      }))
+    ));
   }
 
 })(Editor.prototype, Editor.prototype.virtual);

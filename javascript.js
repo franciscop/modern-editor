@@ -1,6 +1,22 @@
 // Initialize the editor for the article
 var editor = new Editor("article", { menu: "menu" });
 
+
+
+
+
+editor.add('undo', {
+  shortcut: 'ctrl+z',
+  action: editor => editor.history.undo()
+});
+
+editor.add('redo', {
+  shortcut: 'ctrl+y',
+  action: editor => editor.history.redo()
+});
+
+
+
 // // When an element has only one child (no matter the type)
 // editor.on('clean:single', function(node){
 //   //console.log();
@@ -66,6 +82,7 @@ editor.add("bold", {
   shortcut: 'ctrl+b',
   action: function(){
     editor.command('bold');
+    editor.history.register();
   }
 });
 

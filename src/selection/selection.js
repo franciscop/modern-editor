@@ -100,3 +100,56 @@ Editor.prototype.selection.restore = function () {
   selection.removeAllRanges();
   selection.addRange(range);
 }
+
+Editor.prototype.selection.cursor = function(editor){
+  var selected = window.getSelection();
+  var anchor = selected.anchorNode;
+  while (anchor && anchor.nodeType !== 1) {
+    anchor = anchor.parentNode;
+  }
+  return {
+    index: u(editor.element).children().nodes.indexOf(anchor),
+    offset: selected.anchorOffset
+  };
+}
+
+Editor.prototype.selection.setCursor = function(saved){
+  this.editor.element.focus();
+  range = document.createRange();
+  var div = u(this.editor.element).children().nodes[saved.index];
+  if (!div) return;
+  var child = div.childNodes[0];
+  if (!child) return;
+  range.setStart(child, saved.offset);
+  range.setEnd(child, saved.offset);
+  var selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+
+
+
+
+//   this.editor.element.focus();
+//   var sel = window.getSelection();
+//   var range = sel.getRangeAt(0);
+//   var sC=this.editor.element;
+//   var eC=this.editor.element;
+//
+//   var C = rp.sC;
+//   var x = C.length;
+//   while(x--) {
+//     sC = sC.childNodes[C[x]];
+//   }
+//   var C = rp.eC;
+//   var x = C.length;
+//   while(x--) {
+//     eC=eC.childNodes[C[x]];
+//   }
+//
+//   range.setStart(sC,rp.sO);
+//   range.setEnd(eC,rp.eO);
+//   sel.removeAllRanges();
+//   sel.addRange(range)
+// }

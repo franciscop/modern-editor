@@ -38,33 +38,15 @@ describe('Represents html correctly', function(){
       if (html.length > 1) {
         var div = u('<article>' + html[0]).first();
         var editor = new Editor(div);
-        expect(editor.content).to.equal(html[1]);
+        expect(editor.build()).to.equal(html[1]);
       } else {
         var div = u('<article>' + html).first();
         var editor = new Editor(div);
-        expect(editor.content).to.equal(html[0]);
+        expect(editor.build()).to.equal(html[0]);
       }
     });
   });
 });
-
-describe('Model to html builds correctly', function(){
-  var editor = Editor('<div><p></p></div>');
-
-  it('builds correctly a p', function(){
-    var model = { type: 'p', text: 'Modern editor', tags: [] };
-    var part = editor.build(model);
-    expect(part).to.equal('<p>Modern editor</p>');
-  });
-
-  it('builds correctly a link', function(){
-    var model = { type: 'a', attributes: { href: '/bla' }, text: 'bla', tags: [] };
-    var part = editor.build(model);
-    expect(part).to.equal('<a href="/bla">bla</a>');
-  });
-});
-
-
 
 
 // editor.virtual.build({ type: 'a', attributes: { href: '/bla' }, text: 'bla', tags: [] });
@@ -159,5 +141,25 @@ describe('Virtual DOM parser', function(){
   it('Can clean stuff', function(){
     var clean = editor.virtual.clean('  a ');
     expect(clean).to.equal('a');
+  });
+});
+
+
+describe('History', function(){
+  it('Can register entries', function(){
+    var editor = new Editor('<article><p>Zero</p></article>');
+    editor.history.register(editor.parse('<p>First</p>'));
+    editor.history.register(editor.parse('<p>Second</p>'));
+    editor.history.register(editor.parse('<p>Third</p>'));
+    expect(editor.build()).to.equal('<p>Third</p>');
+  });
+
+  it('Can go back one', function(){
+    var editor = new Editor('<article><p>Zero</p></article>');
+    editor.history.register(editor.parse('<p>First</p>'));
+    editor.history.register(editor.parse('<p>Second</p>'));
+    editor.history.register(editor.parse('<p>Third</p>'));
+    editor.history.undo();
+    expect(editor.build()).to.equal('<p>Second</p>');
   });
 });

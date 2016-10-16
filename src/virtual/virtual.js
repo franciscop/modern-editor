@@ -10,7 +10,7 @@
       : '',
     open: data => `<${data.type}${tags.attrs(data.attributes)}>`,
     close: data => `</${data.type}>`
-  }
+  };
 
   var desc = (a, b) => b.position - a.position;
 

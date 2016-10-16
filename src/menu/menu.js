@@ -51,6 +51,9 @@ function generate(element, editor){
   return('<a href="test">Hi there</a>');
 }
 
+Editor.prototype.menu.test = function(num){
+  this.editor.b = num;
+}
 
 // Add an element to the menu
 Editor.prototype.menu.add = function(element, options){

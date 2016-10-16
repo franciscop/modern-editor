@@ -13,12 +13,9 @@ var Editor = function(selector, options){
   }
 
   this.model = this.parse(this.element.innerHTML);
-  this.content = this.build();
 
-  this.history = {
-    entries: [this.model]
-  };
-
+  this.history(this);
+  this.history.register(this.model);
 
   // Editor options
   options = options || {};
@@ -49,6 +46,11 @@ var Editor = function(selector, options){
   document.addEventListener("click", function(e){ editor.trigger('refresh', e); });
 
   this.trigger('init');
+
+  var editor = this;
+  this.on('refresh', function(){
+    editor.history.register();
+  });
 };
 
 
@@ -83,4 +85,5 @@ u.prototype.editor = function(options){
 };
 
 
-Editor.prototype.virtual = {};
+Editor.prototype.virtual = function(){ this.virtual.editor = this; };
+Editor.prototype.history = function(self){ this.history.editor = self; };

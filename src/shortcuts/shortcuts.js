@@ -19,7 +19,8 @@ Editor.prototype.shortcuts = function(){
     editor.trigger('action:' + data, e);
   });
 
-  u(this.element).on("key", function(e){
+  u(this.element).on("keyup", function(e){
+    editor.history.register();
     editor.trigger('refresh');
   });
 };
