@@ -1,0 +1,7 @@
+{
+  "id": "stack",
+  "name": "Stack",
+  "affected": ".stack",
+  "summary": "Allow to set one element on top of each other and gives them a sense of unity.",
+  "included": false
+}

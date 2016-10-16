@@ -2,7 +2,9 @@
 // SELECTION
 Editor.prototype.selection = function(){
   var editor = this;
+  this.selection.editor = this;
   this.selection.element = false;
+  this.selection.elements = [];
   this.selection.text = "";
 
 
@@ -49,6 +51,7 @@ Editor.prototype.selection = function(){
     if (!selected && !hidden) {
       editor.trigger('menu:hide');
     }
+    console.log('triggered', selected, hidden);
   });
 
   this.on('select:check', function(){
@@ -58,7 +61,6 @@ Editor.prototype.selection = function(){
 
     // Selected text
     editor.selection.text = selection.toString();
-
 
     // Store the *right* element
     var node = selection.anchorNode;
@@ -70,3 +72,31 @@ Editor.prototype.selection = function(){
     editor.selection.range = selection.getRangeAt(0);
   });
 };
+
+Editor.prototype.selection.save = function(){
+
+  var editor = this.editor;
+
+  // Selected text
+  var selected = window.getSelection();
+  editor.selection.saved = {};
+  for (var key in selected) {
+    editor.selection.saved[key] = selected[key];
+  }
+}
+
+Editor.prototype.selection.restore = function () {
+  var editor = this.editor;
+
+  if (!editor || !editor.selection.saved) return;
+
+  var saved = editor.selection.saved;
+
+  console.log("Saved:", saved);
+  range = document.createRange();
+  range.setStart(saved.anchorNode, saved.anchorOffset);
+  range.setEnd(saved.focusNode, saved.focusOffset);
+  var selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}

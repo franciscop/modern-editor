@@ -25,6 +25,6 @@ article p {
   padding: 0 0 1em;
 }
 
-ul {
+ul, ol {
   padding-left: 20px;
 }

@@ -1,0 +1,10 @@
+{
+  "id": "checkbox",
+  "name": "Checkbox",
+  "included": true,
+  "affected": "[type=checkbox]",
+  "summary": "The classical checkbox revisited for bigger and coherent shape.",
+  "dependencies": [
+    "radiocheckbox/v2"
+    ]
+}

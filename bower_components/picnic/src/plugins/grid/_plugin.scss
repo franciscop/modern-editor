@@ -1,0 +1,162 @@
+@import 'class';
+
+$picnic-grid-gutter: $picnic-separation !default;
+$picnic-grid-gutter-vertical: $picnic-grid-gutter !default;
+$picnic-grid-gutter-horizontal: $picnic-grid-gutter !default;
+
+$picnic-grid-sizes: 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 !default;
+$picnic-grid-children: $picnic-grid-sizes !default;
+$picnic-grid-off: $picnic-grid-sizes !default;
+
+$picnic-grid-count: one two three four five six seven eight nine ten eleven twelve !default;
+$picnic-grid-count-sizes: (
+  one: 100%,
+  two: 50%,
+  three: 33.33333%,
+  four: 25%,
+  five: 20%,
+  six: 16.66666%,
+  seven: 14.28571%,
+  eight: 12.5%,
+  nine: 11.11111%,
+  ten: 10%,
+  eleven: 9.09091%,
+  twelve: 8.33333%
+);
+$picnic-grid-part: full half third two-third fourth three-fourth fifth two-fifth three-fifth four-fifth sixth !default;
+$picnic-grid-part-sizes: (
+  full: 100%,
+  half: 50%,
+  third: 33.33333%,
+  two-third: 66.66666%,
+  fourth: 25%,
+  three-fourth: 75%,
+  fifth: 20%,
+  two-fifth: 40%,
+  three-fifth: 60%,
+  four-fifth: 80%,
+  sixth: 16.66666%
+);
+$picnic-grid-offpart: none half third two-third fourth three-fourth fifth two-fifth three-fifth four-fifth sixth !default;
+$picnic-grid-offpart-sizes: (
+  half: 50%,
+  third: 33.33333%,
+  two-third: 66.66666%,
+  fourth: 25%,
+  three-fourth: 75%,
+  fifth: 20%,
+  two-fifth: 40%,
+  three-fifth: 60%,
+  four-fifth: 80%,
+  sixth: 16.66666%,
+  none: 0
+);
+
+
+@function in($list, $var) {
+  @return (false != index($list, $var));
+}
+
+.flex {
+  display: -ms-flexbox;
+  display: flex;
+  margin-left: -$picnic-grid-gutter-horizontal;
+  width: calc(100% + #{$picnic-grid-gutter-horizontal});
+  flex-wrap: wrap;
+  transition: all .3s ease;
+}
+
+.flex > * {
+  box-sizing: border-box;
+  flex: 1 1 auto; /* Default for IE10 bug */
+  padding-left: $picnic-grid-gutter-horizontal;
+  padding-bottom: $picnic-grid-gutter-vertical;
+}
+
+.flex {
+  &[class*="one"],
+  &[class*="two"],
+  &[class*="three"],
+  &[class*="four"],
+  &[class*="five"],
+  &[class*="six"],
+  &[class*="seven"],
+  &[class*="eight"],
+  &[class*="nine"],
+  &[class*="ten"],
+  &[class*="eleven"],
+  &[class*="twelve"] {
+    > * {
+      flex-grow: 0;
+    }
+  }
+}
+
+.flex.grow > * {
+  flex-grow: 1;
+}
+
+.center {
+  justify-content: center;
+}
+
+@each $count in $picnic-grid-count {
+  .#{$count} > * {
+    width: map-get($picnic-grid-count-sizes, $count);
+  }
+}
+
+@each $i in $picnic-grid-sizes {
+  @media all and (min-width: unquote($i + 'px')) {
+    @each $count in $picnic-grid-count {
+      .#{$count}-#{$i} > * {
+        width: map-get($picnic-grid-count-sizes, $count);
+      }
+    }
+  }
+}
+
+
+// Children sizing
+@each $part in $picnic-grid-part {
+  .#{$part} {
+    width: map-get($picnic-grid-part-sizes, $part);
+  }
+}
+.none { display: none; }
+
+
+@each $i in $picnic-grid-sizes {
+  @media all and (min-width: unquote($i + 'px')) {
+    @each $part in $picnic-grid-part {
+      .#{$part}-#{$i} {
+        width: map-get($picnic-grid-part-sizes, $part);
+        display: block;
+      }
+    }
+  }
+}
+@each $i in $picnic-grid-children {
+  @media all and (min-width: unquote($i + 'px')) {
+    .none-#{$i} { display: none; }
+  }
+}
+
+
+
+@each $part in $picnic-grid-offpart {
+  .off-#{$part} {
+    margin-left: map-get($picnic-grid-offpart-sizes, $part);
+  }
+}
+
+
+@each $i in $picnic-grid-sizes {
+  @media all and (min-width: unquote($i + 'px')) {
+    @each $part in $picnic-grid-offpart {
+      .off-#{$part}-#{$i} {
+        margin-left: map-get($picnic-grid-offpart-sizes, $part);
+      }
+    }
+  }
+}

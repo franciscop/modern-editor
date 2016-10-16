@@ -1,0 +1,25 @@
+// Input
+// Handle the writing of text and some other user-generated content
+
+@import 'class';
+
+
+// Browser treats unknow type as "text", so we'll do the same
+input,
+textarea,
+select {
+  @extend %input;
+}
+
+textarea {
+  height: auto;
+}
+
+[type=file],
+[type=color] {
+  cursor: pointer;
+}
+
+[type=file] {
+  height: auto;
+}

@@ -1,0 +1,11 @@
+// Inherit from the class
+@import 'class';
+
+.label {
+  @extend %label;
+
+  font-size: .6em;
+  padding: .4em .6em;
+  margin-left: 1em;
+  line-height: 1;
+}

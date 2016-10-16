@@ -1891,10 +1891,21 @@ if (typeof module === 'object' && module.exports) {
 // An event-based editor for the modern web
 var Editor = function(selector, options){
 
+  if (!(this instanceof Editor)) {
+    return new Editor(selector, options);
+  }
+
   // The instance's editor element (it is required)
   this.element = u(selector).first();
+  if (!u(this.element).html().replace(/\s+/, '') || !u(this.element).children().length) {
+    u(this.element).html('<p>');
+  }
+
+  this.model = this.getContent(this.element);
+  this.content = this.virtual.build(this.model);
 
   // Editor options
+  options = options || {};
   options.delay = options.delay || 200;
   options.active = options.active !== undefined ? options.active : true;
   options.blocks = options.blocks || [];
@@ -1948,10 +1959,15 @@ Editor.prototype.command = function(command, text){
   this.trigger('refresh');
 };
 
+
+
 // Initialization
 u.prototype.editor = function(options){
   return new Editor(this.first(), options);
 };
+
+
+Editor.prototype.virtual = {};
 
 // Register a new full action
 Editor.prototype.add = function(name, options){
@@ -2084,6 +2100,153 @@ u.prototype.content = function(){
     return this.slice(node.childNodes);
   });
 };
+
+// Convert HTML to this format:
+// var content = [{
+//   type: 'h1',
+//   text: 'Modern Editor',
+//   tags: {}
+// }, {
+//   type: 'p',
+//   text: 'This is an event-based rich text editor for the modern web',
+//   tags: {
+//     strong: [
+//       { position: 23, size: 50 }
+//     ],
+//     a: [
+//       { position: 23, size; 50, attributes: { href: 'https://google.com/' } }
+//     ]
+//   }
+// }];
+(function(proto){
+
+  var cleanBlock = text => text
+    .replace(/\s*\n\s*/g, '')
+    .replace(/^\s+/, '')
+    .replace(/\s+$/, '');
+
+  // This doesn't handle nested tags right now
+  // We need childNodes for 'all' to have the text ones
+  var children = tag => [].slice.call(tag.childNodes).reduce((tags, node, i, all) => {
+    // It's not an element
+    if (node.nodeType !== 1) return tags;
+
+    var before = all.slice(0, i).map(one => one.textContent).join('');
+
+    var grandchildren = children(node);
+    for (var key in grandchildren) {
+      grandchildren[key].forEach(part => {
+        tags[key] = tags[key] || [];
+        tags[key].push(Object.assign(part, {
+          position: part.position + before.length
+        }));
+      });
+    }
+
+    var attributes = false;
+    if (node.attributes.length) {
+      attributes = {};
+      for (var i = 0; i < node.attributes.length; i++) {
+        attributes[node.attributes[i].nodeName] = node.attributes[i].value;
+      }
+    }
+    var name = node.nodeName.toLowerCase();
+    tags[name] = tags[name] || [];
+    tags[name].push({
+      position: before.length,
+      size: node.textContent.length,
+      attributes: attributes
+    });
+    return tags;
+  }, { a: [], strong: [], em: [] });
+
+  var flatten = tags => Object.keys(tags).reduce((all, tag) => {
+    var newTags = tags[tag].map(one => Object.assign(one, { type: tag }));
+    return all.concat(newTags);
+  }, []);
+
+  var remove = [];
+  var deduplicate = tags => tags.reduce((tags, tag, i, all) => {
+    var dedup = tags.concat(all.map((against, j) => {
+      if (remove.includes(i)) return;
+      if (i === j) return tag;
+      // x1 <= y2 && y1 <= x2
+      if (tag.position <= against.position && against.position + against.size <= tag.position + tag.size) {
+        // TODO: DEDUPLICATE THE NODES HERE
+        remove.push(j);
+        tag.nested = tag.nested || [];
+        var shifted = against;
+        shifted.position = against.position - tag.position;
+        tag.nested.push(shifted);
+        return tag;
+      }
+      return false;
+    }).filter(n => n)[0]);
+    return dedup;
+  }, []).filter((n, i) => !remove.includes(i));
+
+
+  var nested = (text, tag) => {
+    //if (tag.nested) return(nested(text, tag));
+    // 'string', tag
+    var buildOpt = {
+      type: false,
+      text: text,
+      tags: tag.map(tag => ({
+        type: tag.type,
+        position: tag.position,
+        size: tag.size
+      }))
+    };
+    var built = proto.build(buildOpt);
+    return built;
+  }
+
+
+  var attrs = (attrs) => attrs ? ' ' + Object.keys(attrs).map(key =>
+    `${key}="${attrs[key]}"`
+  ).join(' ') : '';
+
+
+  // data = { text: "blabla", tags: [ { type: 'a', size: 5, position: 10 } ] }
+  proto.build = data => {
+    var text = data.text;
+    var tags = data.tags || [];
+    tags = tags.sort((a, b) => a.position - b.position);
+    // End to front; so it handles the spaces and nesting correctly
+    for (var i = tags.length -1; i >= 0; i--) {
+      var tag = tags[i];
+      var before = text.slice(0, tag.position);
+      var middle = text.slice(tag.position, tag.position + tag.size);
+      tag.text = tag.nested ? nested(middle, tag.nested) : middle
+      var after = text.slice(tag.position + tag.size);
+      text = before + proto.build(tag) + after;
+    }
+    var attributes = attrs(data.attributes);
+    return data.type ? `<${data.type}${attributes}>${text}</${data.type}>` : text;
+  };
+
+
+
+  proto.getContent = function(element){
+
+    var root = u('<article>').html(cleanBlock(element.innerHTML)).first();
+
+    return u(root).children().nodes.map(node => ({
+      type: node.nodeName.toLowerCase(),
+      text: cleanBlock(node.textContent),
+      tags: children(node),
+      build: function(){
+        return proto.build({
+          type: this.type,
+          text: this.text,
+          tags: deduplicate(flatten(this.tags))
+        });
+      }
+    }));
+  };
+
+})(Editor.prototype);
 
 
 Editor.prototype.default = function(){
@@ -2311,7 +2474,9 @@ Editor.prototype.menu.events = function(){
 // SELECTION
 Editor.prototype.selection = function(){
   var editor = this;
+  this.selection.editor = this;
   this.selection.element = false;
+  this.selection.elements = [];
   this.selection.text = "";
 
 
@@ -2358,6 +2523,7 @@ Editor.prototype.selection = function(){
     if (!selected && !hidden) {
       editor.trigger('menu:hide');
     }
+    console.log('triggered', selected, hidden);
   });
 
   this.on('select:check', function(){
@@ -2367,7 +2533,6 @@ Editor.prototype.selection = function(){
 
     // Selected text
     editor.selection.text = selection.toString();
-
 
     // Store the *right* element
     var node = selection.anchorNode;
@@ -2379,6 +2544,34 @@ Editor.prototype.selection = function(){
     editor.selection.range = selection.getRangeAt(0);
   });
 };
+
+Editor.prototype.selection.save = function(){
+
+  var editor = this.editor;
+
+  // Selected text
+  var selected = window.getSelection();
+  editor.selection.saved = {};
+  for (var key in selected) {
+    editor.selection.saved[key] = selected[key];
+  }
+}
+
+Editor.prototype.selection.restore = function () {
+  var editor = this.editor;
+
+  if (!editor || !editor.selection.saved) return;
+
+  var saved = editor.selection.saved;
+
+  console.log("Saved:", saved);
+  range = document.createRange();
+  range.setStart(saved.anchorNode, saved.anchorOffset);
+  range.setEnd(saved.focusNode, saved.focusOffset);
+  var selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
 
 
 // SHORTCUTS
@@ -2434,16 +2627,24 @@ Editor.prototype.tag = function(name, attr){
       tag += " " + key + '="' + (attr[key] || "") + '"';
     }
     tag += ">" + this.selection.text + "</" + name + ">";
-    this.command("insertHtml", tag);
+
+    try {
+      var selwin = window.getSelection();
+      this.command("insertHtml", tag);
+    } catch(e){
+      console.log("Error:", e);
+    }
 
     var el = u('.' + className).first();
+    if (!el) return;
+
     el.classList.remove(className);
-    if (el.classList.length === 0)
+    if (el.classList.length === 0) {
       el.removeAttribute('class');
+    }
 
-    range = document.createRange();
+    var range = document.createRange();
     range.selectNodeContents(el);
-
     var selection = window.getSelection();
     selection.removeAllRanges();
     selection.addRange(range);
@@ -2451,3 +2652,34 @@ Editor.prototype.tag = function(name, attr){
 
   this.trigger('refresh');
 };
+
+// Virtual, a small virtual DOM representation for text content
+(function(virtual){
+
+  virtual.clean = text => text.replace(/^\s+/, '').replace(/\s+$/, '');
+
+  // Build the tags
+  var tags = {
+    attrs: attrs => attrs
+      ? ' ' + Object.keys(attrs).map(key => `${key}="${attrs[key]}"`).join(' ')
+      : '',
+    open: data => `<${data.type}${tags.attrs(data.attributes)}>`,
+    close: data => `</${data.type}>`
+  }
+
+  var desc = (a, b) => b.position - a.position;
+
+  // Tag a piece of text with the passed tags in the correct positions:
+  // ('this is Sparta', [{ position: 5, size: 2, type: 'strong' }]) =>
+  // 'this <strong>is</strong> Sparta'
+  // End to front; so it handles the spaces and nesting correctly
+  virtual.tag = (text, tags = []) => tags.sort(desc).reduce((text, tag) =>
+    text.slice(0, tag.position) + virtual.build(Object.assign(tag, {
+      text: text.slice(tag.position, tag.position + tag.size)
+    })) + text.slice(tag.position + tag.size)
+  , text);
+
+  // Top level builder that doesn't care about low-level stuff
+  virtual.build = e => tags.open(e) + virtual.tag(e.text || '', e.tags) + tags.close(e);
+
+})(Editor.prototype.virtual);

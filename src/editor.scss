@@ -14,7 +14,7 @@ $border-radius: 5px !default;
 }
 
 .menu {
-  background: #fff;
+  background-color: #fff;
   border: 1px solid #ccc;
   border-radius: $border-radius;
   box-shadow: 0 0 10px rgba(0, 0, 0, .2);
@@ -94,7 +94,7 @@ $border-radius: 5px !default;
     }
 
     option {
-      background: #fff;
+      background-color: #fff;
     }
   }
 }

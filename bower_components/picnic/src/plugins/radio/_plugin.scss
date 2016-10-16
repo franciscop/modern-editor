@@ -1,0 +1,9 @@
+// Radio
+// Allows to choose one element from several of them
+@import 'class';
+
+
+[type=radio] {
+  @extend %radio;
+  }
+

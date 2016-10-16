@@ -2,10 +2,21 @@
 // An event-based editor for the modern web
 var Editor = function(selector, options){
 
+  if (!(this instanceof Editor)) {
+    return new Editor(selector, options);
+  }
+
   // The instance's editor element (it is required)
   this.element = u(selector).first();
+  if (!u(this.element).html().replace(/\s+/, '') || !u(this.element).children().length) {
+    u(this.element).html('<p>');
+  }
+
+  this.model = this.getContent(this.element);
+  this.content = this.virtual.build(this.model);
 
   // Editor options
+  options = options || {};
   options.delay = options.delay || 200;
   options.active = options.active !== undefined ? options.active : true;
   options.blocks = options.blocks || [];
@@ -59,7 +70,12 @@ Editor.prototype.command = function(command, text){
   this.trigger('refresh');
 };
 
+
+
 // Initialization
 u.prototype.editor = function(options){
   return new Editor(this.first(), options);
 };
+
+
+Editor.prototype.virtual = {};

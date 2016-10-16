@@ -50,7 +50,7 @@ module.exports = function (grunt) {
 
     watch: {
       scripts: {
-        files: ['package.js', '*.js', 'src/*.*', 'src/**/*.*'],
+        files: ['package.js', '*.js', 'src/*.*', 'src/**/*.*', 'test/*.*'],
         tasks: ['default'],
         options: { spawn: false, livereload: true },
       }
@@ -67,5 +67,5 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-bytesize');
 
   // 4. Where we tell Grunt what to do when we type "grunt" into the terminal
-  grunt.registerTask('default', ['concat', 'uglify', 'sass', 'bytesize' /*'jade', 'mocha_phantomjs'*/]);
+  grunt.registerTask('default', ['concat', 'uglify', 'sass', 'bytesize']);
 };

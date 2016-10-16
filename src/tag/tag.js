@@ -26,16 +26,24 @@ Editor.prototype.tag = function(name, attr){
       tag += " " + key + '="' + (attr[key] || "") + '"';
     }
     tag += ">" + this.selection.text + "</" + name + ">";
-    this.command("insertHtml", tag);
+
+    try {
+      var selwin = window.getSelection();
+      this.command("insertHtml", tag);
+    } catch(e){
+      console.log("Error:", e);
+    }
 
     var el = u('.' + className).first();
+    if (!el) return;
+
     el.classList.remove(className);
-    if (el.classList.length === 0)
+    if (el.classList.length === 0) {
       el.removeAttribute('class');
+    }
 
-    range = document.createRange();
+    var range = document.createRange();
     range.selectNodeContents(el);
-
     var selection = window.getSelection();
     selection.removeAllRanges();
     selection.addRange(range);

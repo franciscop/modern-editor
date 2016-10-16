@@ -7,7 +7,7 @@
     transform: translateY(-2em) rotateX(0deg); } }
 
 .menu {
-  background: #fff;
+  background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
@@ -64,4 +64,4 @@
     .menu select:focus {
       border: 0px none; }
     .menu select option {
-      background: #fff; }
+      background-color: #fff; }

@@ -1,0 +1,7 @@
+{
+  "id": "card",
+  "name": "Card",
+  "included": false,
+  "affected": ".card",
+  "summary": "A self-contained, independent element. It works great with others of its kind."
+}

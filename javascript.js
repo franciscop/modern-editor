@@ -18,6 +18,47 @@ var editor = new Editor("article", { menu: "menu" });
 // });
 
 
+editor.add("math", {
+  menu: '<i class="icon-superscript"></i>',
+  shortcut: 'ctrl+m',
+  action: function () {
+    function surroundSelectedText(templateElement){
+      templateElement = u(templateElement).first();
+      var range, sel = rangy.getSelection();
+      var ranges = sel.getAllRanges();
+      var children = u().slice(u('article > *').nodes.map(node => node.textContent));
+      console.log(sel, children[1]);
+      console.log(children.filter(node => node === sel.anchorNode.textContent));
+      var textNodes, textNode, el, i, len, j, jLen;
+      for (i = 0, len = ranges.length; i < len; ++i) {
+        range = ranges[i];
+        // If one or both of the range boundaries falls in the middle
+        // of a text node, the following line splits the text node at the
+        // boundary
+        range.splitBoundaries();
+
+        // The first parameter below is an array of valid nodeTypes
+        // (in this case, text nodes only)
+        textNodes = range.getNodes([3]);
+
+        for (j = 0, jLen = textNodes.length; j < jLen; ++j) {
+          textNode = textNodes[j];
+          el = templateElement.cloneNode(false);
+          textNode.parentNode.insertBefore(el, textNode);
+          el.appendChild(textNode);
+        }
+      }
+    }
+
+    var span = document.createElement("span");
+    span.style.color = "green";
+    span.style.fontWeight = "bold";
+
+    surroundSelectedText('<strong>');
+    console.log("Math");
+  }
+});
+
 
 // A simple button
 editor.add("bold", {
@@ -34,9 +75,27 @@ editor.add("link", {
   shortcut: 'ctrl+k',
   panel: '<div class="card">Hello</div>',
   action: function(){
-    var link = editor.selection.element.getAttribute("href") || "";
-    var address = prompt("Link address", link);
-    editor.tag('a', (address ? { href: address } : false));
+    editor.selection.save();
+    u('form.link').on('submit', function(e){
+      editor.selection.restore();
+      e.preventDefault();
+      var address = u('form.link input').first().value;
+      editor.tag('a', (address ? { href: address } : false));
+    });
+
+    return;
+    u('body').prepend('<form class="link"><input>');
+    u('form.link input').first().focus();
+    u('form.link').on('submit', function(e){
+      e.preventDefault();
+      var address = u('form.link input').first().value;
+      u('form.link').remove();
+      editor.selection.restore();
+      editor.tag('a', (address ? { href: address } : false));
+    });
+    // var link = editor.selection.element.getAttribute("href") || "";
+    // var address = prompt("Link address", link);
+    // editor.tag('a', (address ? { href: address } : false));
   }
 });
 
