@@ -11,7 +11,7 @@ editor.add('undo', {
 });
 
 editor.add('redo', {
-  shortcut: 'ctrl+y',
+  shortcut: 'ctrl+shift+z',
   action: editor => editor.history.redo()
 });
 

@@ -120,11 +120,15 @@ Editor.prototype.selection.setCursor = function(saved){
   if (!div) return;
   var child = div.childNodes[0];
   if (!child) return;
-  range.setStart(child, saved.offset);
-  range.setEnd(child, saved.offset);
-  var selection = window.getSelection();
-  selection.removeAllRanges();
-  selection.addRange(range);
+  try {
+    range.setStart(child, saved.offset);
+    range.setEnd(child, saved.offset);
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  } catch(e) {
+    console.log("Error:", e);
+  }
 }
 
 
