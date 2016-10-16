@@ -15,7 +15,7 @@
 //     ]
 //   }
 // }];
-(function(proto){
+(function(proto, virtual){
 
   var cleanBlock = text => text
     .replace(/\s*\n\s*/g, '')
@@ -57,90 +57,47 @@
     return tags;
   }, { a: [], strong: [], em: [] });
 
-  var flatten = tags => Object.keys(tags).reduce((all, tag) => {
+  proto.flatten = tags => Object.keys(tags).reduce((all, tag) => {
     var newTags = tags[tag].map(one => Object.assign(one, { type: tag }));
     return all.concat(newTags);
   }, []);
 
-  var remove = [];
-  var deduplicate = tags => tags.reduce((tags, tag, i, all) => {
-    var dedup = tags.concat(all.map((against, j) => {
-      if (remove.includes(i)) return;
-      if (i === j) return tag;
-      // x1 <= y2 && y1 <= x2
-      if (tag.position <= against.position && against.position + against.size <= tag.position + tag.size) {
-        // TODO: DEDUPLICATE THE NODES HERE
-        remove.push(j);
-        tag.nested = tag.nested || [];
-        var shifted = against;
-        shifted.position = against.position - tag.position;
-        tag.nested.push(shifted);
-        return tag;
-      }
-      return false;
-    }).filter(n => n)[0]);
-    return dedup;
-  }, []).filter((n, i) => !remove.includes(i));
-
-
-  var nested = (text, tag) => {
-    //if (tag.nested) return(nested(text, tag));
-    // 'string', tag
-    var buildOpt = {
-      type: false,
-      text: text,
-      tags: tag.map(tag => ({
-        type: tag.type,
-        position: tag.position,
-        size: tag.size
-      }))
-    };
-    var built = proto.build(buildOpt);
-    return built;
+  proto.deduplicate = function(tags){
+    var remove = [];
+    return proto.flatten(tags).reduce((tags, tag, i, all) => {
+      var dedup = tags.concat(all.map((against, j) => {
+        if (remove.includes(i)) return;
+        if (i === j) return tag;
+        // x1 <= y2 && y1 <= x2
+        if (tag.position <= against.position && against.position + against.size <= tag.position + tag.size) {
+          remove.push(j);
+          tag.tags = tag.tags || [];
+          var shifted = against;
+          shifted.position = against.position - tag.position;
+          tag.tags.push(shifted);
+          return tag;
+        }
+        return false;
+      }).filter(n => n)[0]);
+      return dedup;
+    }, []).filter((n, i) => !remove.includes(i));
   }
 
 
-  var attrs = (attrs) => attrs ? ' ' + Object.keys(attrs).map(key =>
-    `${key}="${attrs[key]}"`
-  ).join(' ') : '';
 
+  // Build each of the parts and put them together
+  proto.build = function(model){
+    return this.model.map(part => Object.assign(part, {
+      tags: proto.deduplicate(part.tags)
+    })).map(virtual.build).join('');
+  }
 
-  // data = { text: "blabla", tags: [ { type: 'a', size: 5, position: 10 } ] }
-  proto.build = data => {
-    var text = data.text;
-    var tags = data.tags || [];
-    tags = tags.sort((a, b) => a.position - b.position);
-    // End to front; so it handles the spaces and nesting correctly
-    for (var i = tags.length -1; i >= 0; i--) {
-      var tag = tags[i];
-      var before = text.slice(0, tag.position);
-      var middle = text.slice(tag.position, tag.position + tag.size);
-      tag.text = tag.nested ? nested(middle, tag.nested) : middle
-      var after = text.slice(tag.position + tag.size);
-      text = before + proto.build(tag) + after;
-    }
-    var attributes = attrs(data.attributes);
-    return data.type ? `<${data.type}${attributes}>${text}</${data.type}>` : text;
-  };
-
-
-
-  proto.getContent = function(element){
-
-    var root = u('<article>').html(cleanBlock(element.innerHTML)).first();
-
-    return u(root).children().nodes.map(node => ({
+  proto.parse = function(html){
+    return u('<article>').html(cleanBlock(html)).children().nodes.map(node => ({
       type: node.nodeName.toLowerCase(),
       text: cleanBlock(node.textContent),
-      tags: children(node),
-      build: function(){
-        return proto.build({
-          type: this.type,
-          text: this.text,
-          tags: deduplicate(flatten(this.tags))
-        });
-      }
+      tags: children(node)
     }));
-  };
+  }
 
-})(Editor.prototype);
+})(Editor.prototype, Editor.prototype.virtual);
