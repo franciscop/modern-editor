@@ -1901,10 +1901,13 @@ var Editor = function(selector, options){
     u(this.element).html('<p>');
   }
 
-  //this.model = this.getContent(this.element);
   this.model = this.parse(this.element.innerHTML);
-  //this.content = this.model.map(part => part.build()).join('');
   this.content = this.build();
+
+  this.history = {
+    entries: [this.model]
+  };
+
 
   // Editor options
   options = options || {};
