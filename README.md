@@ -1,4 +1,6 @@
 
+> **DISCONTINUED** this project has become a much harder thing that I thought initially. The main problem is Contenteditable, which works great for basic things such as bold but is a horrible tool to build upon. I am using [CKEditor](https://ckeditor.com/) now and totally looking forward [CKEditor 5](http://ckeditor.com/blog-list).
+
 <a href="http://www.francisco.io/editor/" target="\_blank">
   <img src="https://raw.githubusercontent.com/franciscop/modern-editor/master/screenshot.png" alt="Modern Editor" />
 </a>
@@ -28,11 +30,11 @@ These are the available options with their defaults:
 
 ```js
 var options = {
-  
+
   // The class that will be assigned to the menu (in case there's a conflict).
   // If you modify it, remember to modify also the editor.css
   menu: 'menu',
-  
+
   // Show or not the menu when the action menu:show is triggered
   active: true,
 };

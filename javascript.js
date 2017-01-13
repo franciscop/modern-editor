@@ -16,6 +16,57 @@ editor.add('redo', {
 });
 
 
+u.prototype.styles = function(filter, not){
+  var node = this.first();
+  not = not || ['none', 'auto', '0px', 'normal', '0', '1'];
+
+  var cs = window.getComputedStyle(node, null);
+
+  if (!filter) {
+    var len = cs.length;
+    filter = [];
+    for (var i=0;i<len;i++) {
+      if (!cs[i].match(/^\-/))
+        filter.push(cs[i]);
+    }
+  }
+
+  return this.args(filter).reduce((all, key) => {
+    var value = cs.getPropertyValue(key);
+    if (value && !not.includes(value)) {
+      all[key] = value;
+    }
+    return all;
+  }, {});
+
+}
+
+
+u(editor.element).on('mouseover', e => {
+  var pre = u(e.target).closest('pre');
+  if (pre.length > 0) {
+    var size = pre.size();
+
+    var doc = u('html').size();
+    var top = size.top - doc.top - size.height;
+    if (top < 0 ) top = 0;
+    var right = size.right - size.width;
+    if (right < 0) right = 0;
+
+    u(pre).append(`
+      <div class="settings" style="top: ${top}px; right: ${right}px;">
+        <i class="icon-cog"></i>
+        <i class="icon-pencil"></i>
+      </div>
+    `);
+  }
+});
+
+u(editor.element).on('mouseout', e => {
+  u('.settings').remove();
+});
+
+
 
 // // When an element has only one child (no matter the type)
 // editor.on('clean:single', function(node){
@@ -40,7 +91,6 @@ editor.add("math", {
   action: function () {
     function surroundSelectedText(templateElement){
       templateElement = u(templateElement).first();
-      var range, sel = rangy.getSelection();
       var ranges = sel.getAllRanges();
       var children = u().slice(u('article > *').nodes.map(node => node.textContent));
       console.log(sel, children[1]);

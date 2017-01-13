@@ -19,7 +19,8 @@
     "url": "https://github.com/franciscop/modern-editor/issues"
   },
   "scripts": {
-    "test": "mocha-phantomjs ./tests.html"
+    "test": "mocha-phantomjs ./tests.html",
+    "install": "echo 'This package has been discontinued'"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,7 @@
     "grunt-contrib-watch": "^0.6.1",
     "grunt-markdown": "^0.7.0",
     "grunt-mocha-phantomjs": "^2.0.1",
+    "grunt-rollup": "^0.8.0",
     "grunt-sass": "^1.2.1",
     "mocha-phantomjs": "^4.0.2"
   }

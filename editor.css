@@ -65,3 +65,25 @@
       border: 0px none; }
     .menu select option {
       background-color: #fff; }
+
+body {
+  position: relative; }
+
+.settings {
+  position: absolute;
+  top: 0;
+  right: 0;
+  line-height: 1;
+  font-size: 1.3em;
+  display: block; }
+
+.settings > * {
+  cursor: pointer;
+  float: right;
+  margin: .8em .3em 0 0; }
+
+.settings > *::before {
+  margin: 0; }
+
+pre {
+  margin: 0; }

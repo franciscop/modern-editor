@@ -1908,7 +1908,7 @@ var Editor = function(selector, options){
 
   // Editor options
   options = options || {};
-  options.delay = options.delay || 200;
+  options.delay = options.delay || 1000;
   options.active = options.active !== undefined ? options.active : true;
   options.blocks = options.blocks || [];
   this.options = options;
@@ -1975,7 +1975,7 @@ u.prototype.editor = function(options){
 
 
 Editor.prototype.virtual = function(){ this.virtual.editor = this; };
-Editor.prototype.history = function(self){ this.history.editor = self; };
+Editor.prototype.history = function(){ this.history.editor = this; };
 
 // Register a new full action
 Editor.prototype.add = function(name, options){
@@ -2275,11 +2275,12 @@ Editor.prototype.trigger = function(name){
     ((prevHash << 5) - prevHash) + currVal.charCodeAt(0)
   , 0);
 
-  history.entries = history.entries || [];
-  history.undone = history.undone || [];
-
   // entry = { date: Date, model: {}, type: ''||false }
   history.register = function(type, date){
+    var history = this.editor.history;
+    history.entries = history.entries || [];
+    history.undone = history.undone || [];
+
     var cursor = this.editor.selection.cursor(this.editor);
     var html = this.editor.element.innerHTML;
     var built = hash(html);
@@ -2301,6 +2302,8 @@ Editor.prototype.trigger = function(name){
   };
 
   history.undo = function () {
+    history.entries = history.entries || [];
+    history.undone = history.undone || [];
     if (history.entries.length > 1) {
       var undone = history.entries.pop();
       var entry = history.entries.pop();
@@ -2326,6 +2329,7 @@ Editor.prototype.trigger = function(name){
     }
   }
 })(Editor.prototype.history);
+
 
 // Menu
 
@@ -2740,6 +2744,7 @@ Editor.prototype.tag = function(name, attr){
 
   this.trigger('refresh');
 };
+
 
 // Virtual, a small virtual DOM representation for text content
 (function(virtual){

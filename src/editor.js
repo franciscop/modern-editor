@@ -19,7 +19,7 @@ var Editor = function(selector, options){
 
   // Editor options
   options = options || {};
-  options.delay = options.delay || 200;
+  options.delay = options.delay || 1000;
   options.active = options.active !== undefined ? options.active : true;
   options.blocks = options.blocks || [];
   this.options = options;
@@ -86,4 +86,4 @@ u.prototype.editor = function(options){
 
 
 Editor.prototype.virtual = function(){ this.virtual.editor = this; };
-Editor.prototype.history = function(self){ this.history.editor = self; };
+Editor.prototype.history = function(){ this.history.editor = this; };

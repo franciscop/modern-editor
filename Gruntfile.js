@@ -9,6 +9,11 @@ module.exports = function (grunt) {
 
     concat: {
       dist: {
+        options: {
+          process: function (src, file) {
+            return /test\.js/.test(file) ? '' : src;
+          }
+        },
         src: [
           'bower_components/umbrella/umbrella.js',
           'bower_components/mousetrap/mousetrap.js',
@@ -16,6 +21,11 @@ module.exports = function (grunt) {
           'src/*/*.*',
         ],
         dest: 'editor.js'
+      },
+      test: {
+        files: {
+          'test/test.js': ['src/test.js', 'src/*/test.js']
+        }
       }
     },
 
@@ -58,6 +68,7 @@ module.exports = function (grunt) {
   });
 
   // Concatenate
+  grunt.loadNpmTasks('grunt-rollup');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
